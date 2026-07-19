@@ -636,6 +636,8 @@ const appScreen = document.getElementById('appScreen');
 const loginBtn = document.getElementById('loginBtn');
 const loginError = document.getElementById('loginError');
 
+initLanguage();
+
 const configHasPlaceholders = Object.values(firebaseConfig).some(v => typeof v === 'string' && v.includes('REPLACE_ME'));
 if (configHasPlaceholders) {
   console.error('Firebase config still contains placeholder values. Update index.html and redeploy to GitHub Pages.');
