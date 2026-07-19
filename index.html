@@ -279,17 +279,17 @@
   </div>
 
   <div class="login-card">
-    <h1>Sign in</h1>
-    <p class="sub">Use the shared account to control the AC from anywhere.</p>
+    <h1 data-i18n="signInTitle">Sign in</h1>
+    <p class="sub" data-i18n="signInSub">Use the shared account to control the AC from anywhere.</p>
     <div class="field">
-      <label for="email">Email</label>
-      <input id="email" type="email" autocomplete="username" placeholder="you@example.com">
+      <label for="email" data-i18n="emailLabel">Email</label>
+      <input id="email" type="email" autocomplete="username" placeholder="you@example.com" data-i18n-placeholder="emailPlaceholder">
     </div>
     <div class="field">
-      <label for="password">Password</label>
-      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+      <label for="password" data-i18n="passwordLabel">Password</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder">
     </div>
-    <button class="btn btn-primary" id="loginBtn">Sign in</button>
+    <button class="btn btn-primary" id="loginBtn" data-i18n="signInButton">Sign in</button>
     <div class="error-text" id="loginError"></div>
   </div>
 </div>
@@ -298,11 +298,15 @@
 <div id="appScreen">
   <header class="appbar">
     <div class="status-pill offline" id="statusPill">
-      <span class="status-dot"></span><span id="statusText">Checking…</span>
+      <span class="status-dot"></span><span id="statusText" data-i18n="statusChecking">Checking…</span>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
-      <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
-      <button class="icon-btn" id="logoutBtn" title="Sign out">⏻</button>
+      <select id="languageSelect" class="pill-select" aria-label="Language">
+        <option value="en">English</option>
+        <option value="tr">Türkçe</option>
+      </select>
+      <button class="icon-btn" id="settingsBtn" data-i18n-title="settingsButtonTitle" title="Settings">⚙</button>
+      <button class="icon-btn" id="logoutBtn" data-i18n-title="logoutButtonTitle" title="Sign out">⏻</button>
     </div>
   </header>
 
@@ -318,8 +322,8 @@
       <div class="hero-temp mono"><span id="currentTemp">--</span><span>°C</span></div>
       <div class="hero-meta">
         <div class="hero-state" id="acStateLabel">Unknown</div>
-        <div class="hero-updated" id="lastUpdated">Waiting for device…</div>
-        <div class="live-tag" id="liveTag" style="display:none;"><span class="live-dot"></span>Live update</div>
+        <div class="hero-updated" id="lastUpdated" data-i18n="waitingForDevice">Waiting for device…</div>
+        <div class="live-tag" id="liveTag" style="display:none;"><span class="live-dot"></span><span data-i18n="liveUpdate">Live update</span></div>
       </div>
     </div>
 
@@ -336,61 +340,61 @@
 
   <!-- Schedule -->
   <div class="card">
-    <h2>Night schedule</h2>
+    <h2 data-i18n="nightSchedule">Night schedule</h2>
     <div id="scheduleRows"></div>
     <div class="schedule-status">
-      <span id="scheduleSaveState" class="status-badge saved">Schedule saved</span>
-      <span id="scheduleStatusNote" class="status-note">Your schedule is synced with Firebase.</span>
+      <span id="scheduleSaveState" class="status-badge saved" data-i18n="scheduleSaved">Schedule saved</span>
+      <span id="scheduleStatusNote" class="status-note" data-i18n="scheduleSyncedNote">Your schedule is synced with Firebase.</span>
     </div>
     <div class="save-row">
-      <span class="save-flash" id="schedSaveFlash">Saved</span>
-      <button class="btn btn-save" id="saveScheduleBtn">Save schedule</button>
+      <span class="save-flash" id="schedSaveFlash" data-i18n="savedFlash">Saved</span>
+      <button class="btn btn-save" id="saveScheduleBtn" data-i18n="saveScheduleButton">Save schedule</button>
     </div>
   </div>
 
   <!-- Manual controls -->
   <div class="card">
-    <h2>Manual control</h2>
+    <h2 data-i18n="manualControl">Manual control</h2>
     <div class="manual-grid" id="manualGrid">
       <div class="full power-row">
-        <span class="ctrl-label" style="margin:0;">Power</span>
+        <span class="ctrl-label" style="margin:0;" data-i18n="powerLabel">Power</span>
         <div class="switch" id="powerSwitch"></div>
       </div>
       <div class="full">
-        <div class="ctrl-label">Target temperature</div>
+        <div class="ctrl-label" data-i18n="targetTempLabel">Target temperature</div>
         <div class="temp-stepper">
-          <button id="tempDown">–</button>
+          <button id="tempDown" aria-label="Decrease temperature">–</button>
           <div class="val mono" id="tempVal">24°</div>
-          <button id="tempUp">+</button>
+          <button id="tempUp" aria-label="Increase temperature">+</button>
         </div>
       </div>
       <div>
-        <div class="ctrl-label">Mode</div>
+        <div class="ctrl-label" data-i18n="modeLabel">Mode</div>
         <select class="pill-select" id="modeSelect">
-          <option value="cool">Cool</option>
-          <option value="fan">Fan</option>
-          <option value="dry">Dry</option>
-          <option value="auto">Auto</option>
+          <option value="cool" data-i18n="modeCool">Cool</option>
+          <option value="fan" data-i18n="modeFan">Fan</option>
+          <option value="dry" data-i18n="modeDry">Dry</option>
+          <option value="auto" data-i18n="modeAuto">Auto</option>
         </select>
       </div>
       <div>
-        <div class="ctrl-label">Fan speed</div>
+        <div class="ctrl-label" data-i18n="fanSpeedLabel">Fan speed</div>
         <select class="pill-select" id="fanSelect">
-          <option value="auto">Auto</option>
-          <option value="low">Low</option>
-          <option value="med">Medium</option>
-          <option value="high">High</option>
+          <option value="auto" data-i18n="fanAuto">Auto</option>
+          <option value="low" data-i18n="fanLow">Low</option>
+          <option value="med" data-i18n="fanMedium">Medium</option>
+          <option value="high" data-i18n="fanHigh">High</option>
         </select>
       </div>
     </div>
-    <div class="manual-note" id="manualNote">Auto mode is on — switch to Manual to control the AC directly.</div>
+    <div class="manual-note" id="manualNote" data-i18n="manualNote">Auto mode is on — switch to Manual to control the AC directly.</div>
   </div>
 
   <!-- History -->
   <div class="card">
-    <h2>Last 24 hours</h2>
+    <h2 data-i18n="historyTitle">Last 24 hours</h2>
     <canvas id="historyChart"></canvas>
-    <div id="historyDetails" style="margin-top:12px;color:var(--text-muted);font-size:0.88rem;line-height:1.5;">Tap a chart point to view room/set temperature details.</div>
+    <div id="historyDetails" style="margin-top:12px;color:var(--text-muted);font-size:0.88rem;line-height:1.5;" data-i18n="historyDetailHint">Tap a chart point to view room/set temperature details.</div>
   </div>
 
   <div class="footer-note">Night Cool · connected via Firebase</div>
@@ -399,35 +403,35 @@
   <div id="settingsView" style="display:none;">
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <h2>Settings</h2>
-        <button class="btn btn-save" id="closeSettingsBtn">Back</button>
+        <h2 data-i18n="settingsTitle">Settings</h2>
+        <button class="btn btn-save" id="closeSettingsBtn" data-i18n="backButton">Back</button>
       </div>
       <div class="settings-grid">
         <div class="settings-row">
-          <label><input type="checkbox" id="debugFirebase"><span>Enable Firebase debug (console)</span></label>
+          <label><input type="checkbox" id="debugFirebase"><span data-i18n="debugFirebase">Enable Firebase debug (console)</span></label>
         </div>
         <div class="settings-row">
-          <label><input type="checkbox" id="debugEmitter"><span>Enable IR emitter debug</span></label>
+          <label><input type="checkbox" id="debugEmitter"><span data-i18n="debugEmitter">Enable IR emitter debug</span></label>
         </div>
         <div class="settings-row">
-          <label><input type="checkbox" id="debugReceiver"><span>Enable IR receiver debug</span></label>
+          <label><input type="checkbox" id="debugReceiver"><span data-i18n="debugReceiver">Enable IR receiver debug</span></label>
         </div>
         <div class="settings-group">
-          <label for="calibrationOffset">DS18B20 calibration offset (°C)</label>
+          <label for="calibrationOffset" data-i18n="calibrationOffsetLabel">DS18B20 calibration offset (°C)</label>
           <div class="settings-control-row">
             <input id="calibrationOffset" type="number" step="0.1" value="0.0">
-            <button class="btn btn-save" id="saveCalibrationBtn">Save offset</button>
+            <button class="btn btn-save" id="saveCalibrationBtn" data-i18n="saveOffsetButton">Save offset</button>
           </div>
         </div>
         <div class="settings-group">
-          <label for="hysteresisInput">Controller hysteresis (°C)</label>
+          <label for="hysteresisInput" data-i18n="hysteresisLabel">Controller hysteresis (°C)</label>
           <input id="hysteresisInput" type="number" step="0.1" value="0.5">
         </div>
         <div class="settings-group">
-          <label for="minToggleSec">Min toggle interval (s)</label>
+          <label for="minToggleSec" data-i18n="minToggleLabel">Min toggle interval (s)</label>
           <div class="settings-control-row">
             <input id="minToggleSec" type="number" step="1" value="120">
-            <button class="btn btn-save" id="saveConfigBtn">Save controller config</button>
+            <button class="btn btn-save" id="saveConfigBtn" data-i18n="saveConfigButton">Save controller config</button>
           </div>
         </div>
       </div>
@@ -465,6 +469,162 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
+const translations = {
+  en: {
+    signInTitle: 'Sign in',
+    signInSub: 'Use the shared account to control the AC from anywhere.',
+    emailLabel: 'Email',
+    emailPlaceholder: 'you@example.com',
+    passwordLabel: 'Password',
+    passwordPlaceholder: '••••••••',
+    signInButton: 'Sign in',
+    statusChecking: 'Checking…',
+    settingsButtonTitle: 'Settings',
+    logoutButtonTitle: 'Sign out',
+    waitingForDevice: 'Waiting for device…',
+    liveUpdate: 'Live update',
+    nightSchedule: 'Night schedule',
+    scheduleSaved: 'Schedule saved',
+    scheduleSyncedNote: 'Your schedule is synced with Firebase.',
+    savedFlash: 'Saved',
+    saveScheduleButton: 'Save schedule',
+    manualControl: 'Manual control',
+    powerLabel: 'Power',
+    targetTempLabel: 'Target temperature',
+    modeLabel: 'Mode',
+    modeCool: 'Cool',
+    modeFan: 'Fan',
+    modeDry: 'Dry',
+    modeAuto: 'Auto',
+    fanSpeedLabel: 'Fan speed',
+    fanAuto: 'Auto',
+    fanLow: 'Low',
+    fanMedium: 'Medium',
+    fanHigh: 'High',
+    manualNote: 'Auto mode is on — switch to Manual to control the AC directly.',
+    historyTitle: 'Last 24 hours',
+    historyDetailHint: 'Tap a chart point to view room/set temperature details.',
+    settingsTitle: 'Settings',
+    backButton: 'Back',
+    debugFirebase: 'Enable Firebase debug (console)',
+    debugEmitter: 'Enable IR emitter debug',
+    debugReceiver: 'Enable IR receiver debug',
+    calibrationOffsetLabel: 'DS18B20 calibration offset (°C)',
+    saveOffsetButton: 'Save offset',
+    hysteresisLabel: 'Controller hysteresis (°C)',
+    minToggleLabel: 'Min toggle interval (s)',
+    saveConfigButton: 'Save controller config',
+    unsavedChanges: 'Unsaved changes',
+    scheduleUnsavedNote: 'Remember to press Save schedule to sync your changes.',
+    statusOnline: 'Online',
+    statusOffline: 'Offline',
+    statusOfflineSince: 'Offline since {{since}}',
+    firebaseConfigError: 'Firebase config is not ready. Update the web config and redeploy the site.',
+    sessionPersistenceNote: 'Using session persistence — sign-in will not persist after closing the browser.',
+    inMemoryPersistenceNote: 'Using temporary in-memory auth (private browsing). You may need to sign in again.',
+    signingIn: 'Signing in…',
+    signInError: 'Could not sign in. Check the email and password.',
+    updatedPrefix: 'Updated {{time}}',
+    safetyBanner: 'Room is at {{temp}}°C and Auto mode is on, but the device hasn\'t checked in {{since}}. Check the AC in person if possible.',
+    roomTempLabel: 'Room temp',
+    setTempLabel: 'Set temp'
+  },
+  tr: {
+    signInTitle: 'Giriş yap',
+    signInSub: 'AC\'yi her yerden kontrol etmek için ortak hesabı kullanın.',
+    emailLabel: 'E-posta',
+    emailPlaceholder: 'ornek@ornek.com',
+    passwordLabel: 'Parola',
+    passwordPlaceholder: '••••••••',
+    signInButton: 'Giriş yap',
+    statusChecking: 'Kontrol ediliyor…',
+    settingsButtonTitle: 'Ayarlar',
+    logoutButtonTitle: 'Çıkış yap',
+    waitingForDevice: 'Cihazdan haber bekleniyor…',
+    liveUpdate: 'Canlı güncelleme',
+    nightSchedule: 'Gece programı',
+    scheduleSaved: 'Program kaydedildi',
+    scheduleSyncedNote: 'Program Firebase ile senkronize edildi.',
+    savedFlash: 'Kaydedildi',
+    saveScheduleButton: 'Programı kaydet',
+    manualControl: 'Manuel kontrol',
+    powerLabel: 'Güç',
+    targetTempLabel: 'Hedef sıcaklık',
+    modeLabel: 'Mod',
+    modeCool: 'Soğut',
+    modeFan: 'Fan',
+    modeDry: 'Kurut',
+    modeAuto: 'Otomatik',
+    fanSpeedLabel: 'Fan hızı',
+    fanAuto: 'Otomatik',
+    fanLow: 'Düşük',
+    fanMedium: 'Orta',
+    fanHigh: 'Yüksek',
+    manualNote: 'Otomatik mod açık — AC\'yi doğrudan kontrol etmek için Manuel\'e geçin.',
+    historyTitle: 'Son 24 saat',
+    historyDetailHint: 'Oda/hedef sıcaklık detayları için grafik noktasına dokunun.',
+    settingsTitle: 'Ayarlar',
+    backButton: 'Geri',
+    debugFirebase: 'Firebase hata ayıklamasını etkinleştir (konsol)',
+    debugEmitter: 'IR verici hata ayıklamasını etkinleştir',
+    debugReceiver: 'IR alıcı hata ayıklamasını etkinleştir',
+    calibrationOffsetLabel: 'DS18B20 kalibrasyon ofseti (°C)',
+    saveOffsetButton: 'Ofseti kaydet',
+    hysteresisLabel: 'Kontrolör histerezis (°C)',
+    minToggleLabel: 'Minimum geçiş aralığı (s)',
+    saveConfigButton: 'Kontrolör yapılandırmasını kaydet',
+    unsavedChanges: 'Kaydedilmemiş değişiklikler',
+    scheduleUnsavedNote: 'Değişiklikleri senkronize etmek için Programı kaydet\'e basmayı unutmayın.',
+    statusOnline: 'Çevrimiçi',
+    statusOffline: 'Çevrimdışı',
+    statusOfflineSince: '{{since}}\'den beri çevrimdışı',
+    firebaseConfigError: 'Firebase yapılandırması hazır değil. web config\'i güncelleyin ve siteyi yeniden dağıtın.',
+    sessionPersistenceNote: 'Oturum kalıcılığı kullanılıyor — tarayıcı kapatıldığında giriş kalıcı olmayacaktır.',
+    inMemoryPersistenceNote: 'Geçici bellek içi kimlik doğrulama kullanılıyor (gizli mod). Yeniden giriş yapmanız gerekebilir.',
+    signingIn: 'Giriş yapılıyor…',
+    signInError: 'Giriş yapılamadı. E-posta ve parolayı kontrol edin.',
+    safetyBanner: '{{temp}}°C ve Otomatik mod açık, ancak cihaz {{since}} beri kontrol etmedi. Mümkünse AC\'yi şahsen kontrol edin.',
+    roomTempLabel: 'Oda sıcaklığı',
+    setTempLabel: 'Ayarlanan sıcaklık'
+  }
+};
+
+let currentLang = localStorage.getItem('preferredLang') || 'en';
+function t(key, vars = {}) {
+  const value = (translations[currentLang] && translations[currentLang][key]) || translations.en[key] || key;
+  return Object.entries(vars).reduce((text, [name, val]) => text.replaceAll(`{{${name}}}`, val), value);
+}
+function translatePage(lang) {
+  currentLang = lang;
+  localStorage.setItem('preferredLang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (!key) return;
+    el.textContent = t(key);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (!key) return;
+    el.placeholder = t(key);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.dataset.i18nTitle;
+    if (!key) return;
+    el.title = t(key);
+  });
+  document.getElementById('languageSelect').value = lang;
+  renderScheduleState();
+  renderConnection();
+}
+function initLanguage() {
+  const select = document.getElementById('languageSelect');
+  if (select) {
+    select.value = currentLang;
+    select.addEventListener('change', () => translatePage(select.value));
+  }
+  translatePage(currentLang);
+}
+
 // Debug helpers: log effective config and origin to help browsers like Opera
 console.log('Firebase config (debug):', firebaseConfig);
 console.log('location.origin:', location.origin);
@@ -479,7 +639,7 @@ const loginError = document.getElementById('loginError');
 const configHasPlaceholders = Object.values(firebaseConfig).some(v => typeof v === 'string' && v.includes('REPLACE_ME'));
 if (configHasPlaceholders) {
   console.error('Firebase config still contains placeholder values. Update index.html and redeploy to GitHub Pages.');
-  loginError.textContent = 'Firebase config is not ready. Update the web config and redeploy the site.';
+  loginError.textContent = t('firebaseConfigError');
   loginBtn.disabled = true;
 }
 
@@ -493,12 +653,12 @@ async function ensurePersistence() {
     try {
       await setPersistence(auth, browserSessionPersistence);
       console.log('Auth persistence: session');
-      document.getElementById('loginError').textContent = 'Using session persistence — sign-in will not persist after closing the browser.';
+      document.getElementById('loginError').textContent = t('sessionPersistenceNote');
     } catch (e2) {
       console.warn('Session persistence failed, using in-memory persistence', e2);
       await setPersistence(auth, inMemoryPersistence);
       console.log('Auth persistence: in-memory');
-      document.getElementById('loginError').textContent = 'Using temporary in-memory auth (private browsing). You may need to sign in again.';
+      document.getElementById('loginError').textContent = t('inMemoryPersistenceNote');
     }
   }
 }
@@ -507,17 +667,17 @@ ensurePersistence();
 loginBtn.addEventListener('click', async () => {
   loginError.textContent = '';
   loginBtn.disabled = true;
-  loginBtn.textContent = 'Signing in…';
+  loginBtn.textContent = t('signingIn');
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (err) {
     console.error(err);
-    loginError.textContent = err?.message || 'Could not sign in. Check the email and password.';
+    loginError.textContent = err?.message || t('signInError');
   } finally {
     loginBtn.disabled = false;
-    loginBtn.textContent = 'Sign in';
+    loginBtn.textContent = t('signInButton');
   }
 });
 
@@ -727,7 +887,7 @@ function renderHero() {
   }
 
   const ts = (latestSensor && latestSensor.timestamp) || 0;
-  updatedEl.textContent = ts ? `Updated ${timeAgo(ts)}` : 'Waiting for device…';
+  updatedEl.textContent = ts ? `${t('updatedPrefix', { time: timeAgo(ts) })}` : t('waitingForDevice');
 
   if (lastLiveUpdateAt) {
     liveTag.style.display = 'inline-flex';
@@ -744,8 +904,8 @@ function renderConnection() {
   pill.classList.toggle('online', !stale);
   pill.classList.toggle('offline', stale);
   text.textContent = stale
-    ? (latestHeartbeat ? `Offline since ${formatTime(latestHeartbeat)}` : 'Offline')
-    : 'Online';
+    ? (latestHeartbeat ? t('statusOfflineSince', { since: formatTime(latestHeartbeat) }) : t('statusOffline'))
+    : t('statusOnline');
 }
 
 function checkSafety() {
@@ -756,7 +916,10 @@ function checkSafety() {
   const show = autoEnabled && hot && stale;
   banner.style.display = show ? 'block' : 'none';
   if (show) {
-    bannerText.textContent = `Room is at ${latestSensor.temp.toFixed(1)}°C and Auto mode is on, but the device hasn't checked in ${latestHeartbeat ? 'since ' + formatTime(latestHeartbeat) : ''}. Check the AC in person if possible.`;
+    bannerText.textContent = t('safetyBanner', {
+      temp: latestSensor.temp.toFixed(1),
+      since: latestHeartbeat ? formatTime(latestHeartbeat) : t('waitingForDevice')
+    });
   }
 }
 
@@ -921,13 +1084,13 @@ function renderScheduleState() {
   const note = document.getElementById('scheduleStatusNote');
   if (!badge || !note) return;
   if (scheduleDirty) {
-    badge.textContent = 'Unsaved changes';
+    badge.textContent = t('unsavedChanges');
     badge.className = 'status-badge unsaved';
-    note.textContent = 'Remember to press Save schedule to sync your changes.';
+    note.textContent = t('scheduleUnsavedNote');
   } else {
-    badge.textContent = 'Schedule saved';
+    badge.textContent = t('scheduleSaved');
     badge.className = 'status-badge saved';
-    note.textContent = 'Your schedule is synced with Firebase.';
+    note.textContent = t('scheduleSyncedNote');
   }
 }
 
@@ -1084,8 +1247,8 @@ function renderHistoryDetails(point) {
   const setTemp = Number.isFinite(point.setTemp) ? point.setTemp.toFixed(1) : '--';
   detailsEl.innerHTML = `
     <strong>${time.toLocaleString([], {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'})}</strong><br>
-    Room temp: <strong>${room}°C</strong><br>
-    Set temp: <strong>${setTemp === '--' ? '--' : setTemp + '°C'}</strong>`;
+    ${t('roomTempLabel')}: <strong>${room}°C</strong><br>
+    ${t('setTempLabel')}: <strong>${setTemp === '--' ? '--' : setTemp + '°C'}</strong>`;
 }
 </script>
 
