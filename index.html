@@ -587,6 +587,9 @@ const translations = {
 };
 
 let currentLang = localStorage.getItem('preferredLang') || 'en';
+// Track whether schedule changes are unsaved. Declared early so
+// translatePage() can reference it during initLanguage().
+let scheduleDirty = false;
 function t(key, vars = {}) {
   const value = (translations[currentLang] && translations[currentLang][key]) || translations.en[key] || key;
   return Object.entries(vars).reduce((text, [name, val]) => text.replaceAll(`{{${name}}}`, val), value);
@@ -715,7 +718,6 @@ let latestStatus = null;      // last-known AC state (from device)
 let latestHeartbeat = 0;
 let autoEnabled = true;
 let lastLiveUpdateAt = 0;
-let scheduleDirty = false;
 let schedule = [
   {enabled:true,  start:"22:00", end:"07:00", targetTemp:26},
   {enabled:false, start:"13:00", end:"15:00", targetTemp:26}
