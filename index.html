@@ -370,7 +370,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,
-  setPersistence, browserLocalPersistence
+  setPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getDatabase, ref, onValue, set, get, query, limitToLast
@@ -412,7 +412,26 @@ if (configHasPlaceholders) {
   loginBtn.disabled = true;
 }
 
-setPersistence(auth, browserLocalPersistence).catch(()=>{});
+// Ensure persistence works across browsers; fall back for iOS/private mode.
+async function ensurePersistence() {
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+    console.log('Auth persistence: local');
+  } catch (e1) {
+    console.warn('Local persistence failed, trying session persistence', e1);
+    try {
+      await setPersistence(auth, browserSessionPersistence);
+      console.log('Auth persistence: session');
+      document.getElementById('loginError').textContent = 'Using session persistence — sign-in will not persist after closing the browser.';
+    } catch (e2) {
+      console.warn('Session persistence failed, using in-memory persistence', e2);
+      await setPersistence(auth, inMemoryPersistence);
+      console.log('Auth persistence: in-memory');
+      document.getElementById('loginError').textContent = 'Using temporary in-memory auth (private browsing). You may need to sign in again.';
+    }
+  }
+}
+ensurePersistence();
 
 loginBtn.addEventListener('click', async () => {
   loginError.textContent = '';
