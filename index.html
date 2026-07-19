@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <!-- Chart.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
 <style>
   :root{
@@ -771,6 +771,10 @@ renderManual();
 let chart;
 function renderChart() {
   const ctx = document.getElementById('historyChart');
+  if (!ctx || typeof Chart === 'undefined') {
+    return;
+  }
+
   const labels = historyPoints.map(p => new Date(p.t));
   const data = historyPoints.map(p => p.temp);
 
@@ -838,9 +842,9 @@ function renderChart() {
 }
 </script>
 
-<!-- Chart.js date adapter (for time-scale x axis) -->
+<!-- Optional chart time adapter -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.1/chartjs-adapter-moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
 
 <script>
   if ('serviceWorker' in navigator) {
