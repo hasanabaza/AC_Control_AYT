@@ -660,16 +660,14 @@ function renderHero() {
   if (manualDraft && typeof manualDraft.temp === 'number') setTemp = manualDraft.temp.toFixed(0);
   else if (latestStatus && typeof latestStatus.temp === 'number') setTemp = latestStatus.temp.toFixed(0);
 
-  if (latestStatus && latestStatus.power) {
-    const on = latestStatus.power === 'on';
-    if (on) {
-      stateEl.textContent = `Cooling · ${setTemp}°C`;
-    } else {
-      // AC is off but show the currently set temperature and mode
-      const mode = (manualDraft && manualDraft.mode) ? manualDraft.mode : (latestStatus.mode || '—');
-      stateEl.textContent = `Off · set ${setTemp}°C · ${mode}`;
-    }
-    stateEl.classList.toggle('on', on);
+  const on = latestStatus && latestStatus.power === 'on';
+  const modeLabel = on ? (autoEnabled ? 'Auto' : 'Manual') : 'Off';
+  if (on) {
+    stateEl.textContent = `${modeLabel} · ${setTemp}°C`;
+    stateEl.classList.add('on');
+  } else if (latestStatus && latestStatus.power) {
+    stateEl.textContent = `${modeLabel} · --°C`;
+    stateEl.classList.remove('on');
   } else {
     stateEl.textContent = 'Unknown';
     stateEl.classList.remove('on');
