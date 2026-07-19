@@ -229,6 +229,19 @@
   .save-flash{color:var(--cool);font-size:0.75rem;align-self:center;margin-right:10px;opacity:0;transition:opacity .2s ease;}
   .save-flash.show{opacity:1;}
 
+  .settings-grid{display:grid;gap:14px;}
+  .settings-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 16px;background:var(--surface-2);
+    border:1px solid var(--border);border-radius:16px;
+  }
+  .settings-row label{display:flex;align-items:center;gap:12px;font-size:0.95rem;color:var(--text);cursor:pointer;}
+  .settings-row input[type=checkbox]{accent-color:var(--cool);width:18px;height:18px;}
+  .settings-group{display:flex;flex-direction:column;gap:8px;padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:16px;}
+  .settings-group label{font-size:0.82rem;color:var(--text-muted);margin:0;}
+  .settings-control-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .settings-group input[type=number]{width:100%;max-width:120px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;color:var(--text);font-size:0.95rem;}
+
   .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cool);margin-right:6px;box-shadow:0 0 8px var(--cool);animation:pulse 1.6s infinite;}
   @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.2);opacity:0.7;}}
   .live-tag{display:inline-flex;align-items:center;font-size:0.72rem;color:var(--cool);margin-top:6px;}
@@ -280,40 +293,16 @@
     <div class="status-pill offline" id="statusPill">
       <span class="status-dot"></span><span id="statusText">Checking…</span>
     </div>
-    <button class="icon-btn" id="logoutBtn" title="Sign out">⏻</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
+      <button class="icon-btn" id="logoutBtn" title="Sign out">⏻</button>
+    </div>
   </header>
 
+  <div id="mainView">
   <div id="safetyBanner">
     <b>⚠ Room is warm and the AC isn't responding</b>
     <span id="safetyBannerText"></span>
-  </div>
-
-  <div class="card">
-    <h2>Debug</h2>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <label><input type="checkbox" id="debugFirebase"> Enable Firebase debug (console)</label>
-      <label><input type="checkbox" id="debugEmitter"> Enable IR emitter debug</label>
-      <label><input type="checkbox" id="debugReceiver"> Enable IR receiver debug</label>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        <label for="calibrationOffset">DS18B20 calibration offset (°C)</label>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input id="calibrationOffset" type="number" step="0.1" value="0.0" style="width:100px;">
-          <button class="btn btn-save" id="saveCalibrationBtn">Save offset</button>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
-        <label for="hysteresisInput">Controller hysteresis (°C)</label>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input id="hysteresisInput" type="number" step="0.1" value="0.5" style="width:100px;">
-          <label style="font-size:0.85rem;color:var(--text-muted);">±deg</label>
-        </div>
-        <label for="minToggleSec">Min toggle interval (s)</label>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input id="minToggleSec" type="number" step="1" value="120" style="width:100px;">
-          <button class="btn btn-save" id="saveConfigBtn">Save controller config</button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Hero -->
@@ -394,6 +383,46 @@
   </div>
 
   <div class="footer-note">Night Cool · connected via Firebase</div>
+  </div>
+
+  <div id="settingsView" style="display:none;">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <h2>Settings</h2>
+        <button class="btn btn-save" id="closeSettingsBtn">Back</button>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-row">
+          <label><input type="checkbox" id="debugFirebase"><span>Enable Firebase debug (console)</span></label>
+        </div>
+        <div class="settings-row">
+          <label><input type="checkbox" id="debugEmitter"><span>Enable IR emitter debug</span></label>
+        </div>
+        <div class="settings-row">
+          <label><input type="checkbox" id="debugReceiver"><span>Enable IR receiver debug</span></label>
+        </div>
+        <div class="settings-group">
+          <label for="calibrationOffset">DS18B20 calibration offset (°C)</label>
+          <div class="settings-control-row">
+            <input id="calibrationOffset" type="number" step="0.1" value="0.0">
+            <button class="btn btn-save" id="saveCalibrationBtn">Save offset</button>
+          </div>
+        </div>
+        <div class="settings-group">
+          <label for="hysteresisInput">Controller hysteresis (°C)</label>
+          <input id="hysteresisInput" type="number" step="0.1" value="0.5">
+        </div>
+        <div class="settings-group">
+          <label for="minToggleSec">Min toggle interval (s)</label>
+          <div class="settings-control-row">
+            <input id="minToggleSec" type="number" step="1" value="120">
+            <button class="btn btn-save" id="saveConfigBtn">Save controller config</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ===================== FIREBASE ===================== -->
@@ -506,9 +535,7 @@ let autoEnabled = true;
 let lastLiveUpdateAt = 0;
 let schedule = [
   {enabled:true,  start:"22:00", end:"07:00", targetTemp:26},
-  {enabled:false, start:"13:00", end:"15:00", targetTemp:26},
-  {enabled:false, start:"00:00", end:"00:00", targetTemp:26},
-  {enabled:false, start:"00:00", end:"00:00", targetTemp:26}
+  {enabled:false, start:"13:00", end:"15:00", targetTemp:26}
 ];
 let manualDraft = {power:"off", temp:24, mode:"cool", fan:"auto"};
 let historyPoints = []; // [{t, temp, acOn}]
@@ -558,7 +585,7 @@ function startAppListeners() {
   onValue(ref(db, 'ac/schedule'), (snap) => {
     const v = snap.val();
     if (Array.isArray(v) && v.length) {
-      schedule = [0,1,2,3].map(i => v[i] || schedule[i]);
+      schedule = [0,1].map(i => v[i] || schedule[i]);
       renderSchedule();
       drawNightArc();
     }
@@ -889,8 +916,14 @@ document.getElementById('tempDown').addEventListener('click', () => {
 });
 document.getElementById('modeSelect').addEventListener('change', e => sendCommand({mode: e.target.value}));
 document.getElementById('fanSelect').addEventListener('change', e => sendCommand({fan: e.target.value}));
-
-renderModeSwitch();
+  document.getElementById('settingsBtn').addEventListener('click', () => {
+    document.getElementById('mainView').style.display = 'none';
+    document.getElementById('settingsView').style.display = 'block';
+  });
+  document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+    document.getElementById('mainView').style.display = 'block';
+    document.getElementById('settingsView').style.display = 'none';
+  });
 renderManual();
 
 // ---------------- Chart ----------------
