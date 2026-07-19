@@ -286,6 +286,15 @@
     <span id="safetyBannerText"></span>
   </div>
 
+  <div class="card">
+    <h2>Debug</h2>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <label><input type="checkbox" id="debugFirebase"> Enable Firebase debug (console)</label>
+      <label><input type="checkbox" id="debugEmitter"> Enable IR emitter debug</label>
+      <label><input type="checkbox" id="debugReceiver"> Enable IR receiver debug</label>
+    </div>
+  </div>
+
   <!-- Hero -->
   <div class="card">
     <div class="hero">
@@ -565,6 +574,22 @@ function startAppListeners() {
   renderSchedule();
   drawNightArc();
   setInterval(drawNightArc, 60000);
+
+  // Debug toggles: reflect /ac/debug values and allow toggling
+  const debugFirebaseEl = document.getElementById('debugFirebase');
+  const debugEmitterEl = document.getElementById('debugEmitter');
+  const debugReceiverEl = document.getElementById('debugReceiver');
+
+  onValue(ref(db, 'ac/debug'), (snap) => {
+    const v = snap.val() || {};
+    debugFirebaseEl.checked = !!v.firebase;
+    debugEmitterEl.checked = !!v.irEmitter;
+    debugReceiverEl.checked = !!v.irReceiver;
+  });
+
+  debugFirebaseEl.addEventListener('change', (e) => set(ref(db, 'ac/debug/firebase'), !!e.target.checked));
+  debugEmitterEl.addEventListener('change', (e) => set(ref(db, 'ac/debug/irEmitter'), !!e.target.checked));
+  debugReceiverEl.addEventListener('change', (e) => set(ref(db, 'ac/debug/irReceiver'), !!e.target.checked));
 }
 
 // ---------------- Rendering: hero + connection ----------------
