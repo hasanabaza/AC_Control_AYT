@@ -233,7 +233,9 @@
   @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.2);opacity:0.7;}}
   .live-tag{display:inline-flex;align-items:center;font-size:0.72rem;color:var(--cool);margin-top:6px;}
 
-  canvas#historyChart{max-height:220px;}
+  canvas#historyChart{max-height:220px;touch-action: manipulation;}
+
+  button, .icon-btn, .switch{touch-action: manipulation;}
 
   .footer-note{text-align:center;color:var(--text-muted);font-size:0.7rem;margin-top:20px;padding-bottom:20px;}
 
@@ -388,6 +390,7 @@
   <div class="card">
     <h2>Last 24 hours</h2>
     <canvas id="historyChart"></canvas>
+    <div id="historyDetails" style="margin-top:12px;color:var(--text-muted);font-size:0.88rem;line-height:1.5;">Tap a chart point to view room/set temperature details.</div>
   </div>
 
   <div class="footer-note">Night Cool · connected via Firebase</div>
@@ -548,6 +551,8 @@ function startAppListeners() {
     const v = snap.val();
     autoEnabled = v && typeof v.enabled === 'boolean' ? v.enabled : true;
     renderModeSwitch();
+    renderHero();
+    checkSafety();
   });
 
   onValue(ref(db, 'ac/schedule'), (snap) => {
@@ -660,12 +665,16 @@ function renderHero() {
   if (manualDraft && typeof manualDraft.temp === 'number') setTemp = manualDraft.temp.toFixed(0);
   else if (latestStatus && typeof latestStatus.temp === 'number') setTemp = latestStatus.temp.toFixed(0);
 
-  const on = latestStatus && latestStatus.power === 'on';
+  const power = (latestStatus && typeof latestStatus.power === 'string')
+    ? latestStatus.power
+    : (manualDraft && typeof manualDraft.power === 'string' ? manualDraft.power : 'unknown');
+  const on = power === 'on';
   const modeLabel = on ? (autoEnabled ? 'Auto' : 'Manual') : 'Off';
+
   if (on) {
     stateEl.textContent = `${modeLabel} · ${setTemp}°C`;
     stateEl.classList.add('on');
-  } else if (latestStatus && latestStatus.power) {
+  } else if (power === 'off') {
     stateEl.textContent = `${modeLabel} · --°C`;
     stateEl.classList.remove('on');
   } else {
@@ -929,7 +938,9 @@ function renderChart() {
           backgroundColor: 'rgba(242,166,90,0.08)',
           fill: true,
           tension: 0.3,
-          pointRadius: 0,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointHitRadius: 8,
           borderWidth: 2,
           label: 'Room temp (°C)'
         },
@@ -939,7 +950,9 @@ function renderChart() {
           backgroundColor: 'rgba(79,209,197,0.06)',
           fill: false,
           tension: 0.1,
-          pointRadius: 0,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointHitRadius: 8,
           borderWidth: 2,
           borderDash: [6,4],
           label: 'Set temp (°C)'
@@ -950,6 +963,15 @@ function renderChart() {
       responsive: true,
       animation: false,
       plugins: { legend: {display:false} },
+      interaction: {
+        mode: 'nearest',
+        intersect: true
+      },
+      onClick(evt, activeEls, chart) {
+        if (!activeEls.length) return;
+        const idx = activeEls[0].index;
+        renderHistoryDetails(historyPoints[idx]);
+      },
       scales: {
         x: {
           type: 'time',
@@ -968,6 +990,21 @@ function renderChart() {
 
   if (chart) { chart.data = cfg.data; chart.update(); }
   else { chart = new Chart(ctx, cfg); }
+  if (historyPoints.length) {
+    renderHistoryDetails(historyPoints[historyPoints.length - 1]);
+  }
+}
+
+function renderHistoryDetails(point) {
+  const detailsEl = document.getElementById('historyDetails');
+  if (!detailsEl || !point) return;
+  const time = new Date(point.t);
+  const room = typeof point.temp === 'number' ? point.temp.toFixed(1) : '--';
+  const setTemp = Number.isFinite(point.setTemp) ? point.setTemp.toFixed(1) : '--';
+  detailsEl.innerHTML = `
+    <strong>${time.toLocaleString([], {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'})}</strong><br>
+    Room temp: <strong>${room}°C</strong><br>
+    Set temp: <strong>${setTemp === '--' ? '--' : setTemp + '°C'}</strong>`;
 }
 </script>
 
