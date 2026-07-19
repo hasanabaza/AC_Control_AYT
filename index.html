@@ -292,6 +292,13 @@
       <label><input type="checkbox" id="debugFirebase"> Enable Firebase debug (console)</label>
       <label><input type="checkbox" id="debugEmitter"> Enable IR emitter debug</label>
       <label><input type="checkbox" id="debugReceiver"> Enable IR receiver debug</label>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label for="calibrationOffset">DS18B20 calibration offset (°C)</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="calibrationOffset" type="number" step="0.1" value="0.0" style="width:100px;">
+          <button class="btn btn-save" id="saveCalibrationBtn">Save offset</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -579,6 +586,8 @@ function startAppListeners() {
   const debugFirebaseEl = document.getElementById('debugFirebase');
   const debugEmitterEl = document.getElementById('debugEmitter');
   const debugReceiverEl = document.getElementById('debugReceiver');
+  const calibrationOffsetEl = document.getElementById('calibrationOffset');
+  const saveCalibrationBtn = document.getElementById('saveCalibrationBtn');
 
   onValue(ref(db, 'ac/debug'), (snap) => {
     const v = snap.val() || {};
@@ -587,9 +596,21 @@ function startAppListeners() {
     debugReceiverEl.checked = !!v.irReceiver;
   });
 
+  onValue(ref(db, 'ac/calibration'), (snap) => {
+    const v = snap.val() || {};
+    const offset = typeof v.offset === 'number' ? v.offset : Number(v.offset || 0);
+    if (!Number.isNaN(offset)) {
+      calibrationOffsetEl.value = offset.toFixed(1);
+    }
+  });
+
   debugFirebaseEl.addEventListener('change', (e) => set(ref(db, 'ac/debug/firebase'), !!e.target.checked));
   debugEmitterEl.addEventListener('change', (e) => set(ref(db, 'ac/debug/irEmitter'), !!e.target.checked));
   debugReceiverEl.addEventListener('change', (e) => set(ref(db, 'ac/debug/irReceiver'), !!e.target.checked));
+  saveCalibrationBtn.addEventListener('click', () => {
+    const offset = Number(calibrationOffsetEl.value) || 0;
+    set(ref(db, 'ac/calibration/offset'), offset);
+  });
 }
 
 // ---------------- Rendering: hero + connection ----------------
