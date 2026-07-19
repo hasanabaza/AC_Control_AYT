@@ -34,10 +34,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App shell files: cache-first, falling back to network.
+  // App shell files: use network-first for index.html/root so clients pick up
+  // new deploys quickly (avoids stale cached HTML in some browsers).
   if (SHELL_FILES.some((f) => url.pathname.endsWith(f.replace('./', '')))) {
     event.respondWith(
-      caches.match(event.request).then((cached) => cached || fetch(event.request))
+      fetch(event.request)
+        .then((res) => {
+          // Update cache with fresh response
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return res;
+        })
+        .catch(() => caches.match(event.request))
     );
     return;
   }

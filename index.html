@@ -394,6 +394,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
+// Debug helpers: log effective config and origin to help browsers like Opera
+console.log('Firebase config (debug):', firebaseConfig);
+console.log('location.origin:', location.origin);
+console.log('authDomain:', firebaseConfig.authDomain);
+
 // ---------------- Auth ----------------
 const loginScreen = document.getElementById('loginScreen');
 const appScreen = document.getElementById('appScreen');
