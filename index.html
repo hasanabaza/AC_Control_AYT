@@ -229,6 +229,13 @@
   .save-flash{color:var(--cool);font-size:0.75rem;align-self:center;margin-right:10px;opacity:0;transition:opacity .2s ease;}
   .save-flash.show{opacity:1;}
 
+  .schedule-status{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 6px;font-size:0.85rem;}
+  .status-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid transparent;font-weight:600;}
+  .status-badge.saved{color:var(--cool);border-color:var(--cool);background:rgba(79,209,197,0.1);}
+  .status-badge.unsaved{color:#F2A65A;border-color:#F2A65A;background:rgba(242,166,90,0.15);}
+  .status-badge.saving{color:var(--text);border-color:var(--text-muted);background:rgba(255,255,255,0.05);}
+  .status-note{color:var(--text-muted);font-size:0.82rem;}
+
   .settings-grid{display:grid;gap:14px;}
   .settings-row{
     display:flex;align-items:center;justify-content:space-between;
@@ -331,6 +338,10 @@
   <div class="card">
     <h2>Night schedule</h2>
     <div id="scheduleRows"></div>
+    <div class="schedule-status">
+      <span id="scheduleSaveState" class="status-badge saved">Schedule saved</span>
+      <span id="scheduleStatusNote" class="status-note">Your schedule is synced with Firebase.</span>
+    </div>
     <div class="save-row">
       <span class="save-flash" id="schedSaveFlash">Saved</span>
       <button class="btn btn-save" id="saveScheduleBtn">Save schedule</button>
@@ -533,6 +544,7 @@ let latestStatus = null;      // last-known AC state (from device)
 let latestHeartbeat = 0;
 let autoEnabled = true;
 let lastLiveUpdateAt = 0;
+let scheduleDirty = false;
 let schedule = [
   {enabled:true,  start:"22:00", end:"07:00", targetTemp:26},
   {enabled:false, start:"13:00", end:"15:00", targetTemp:26}
@@ -586,7 +598,9 @@ function startAppListeners() {
     const v = snap.val();
     if (Array.isArray(v) && v.length) {
       schedule = [0,1].map(i => v[i] || schedule[i]);
+      scheduleDirty = false;
       renderSchedule();
+      renderScheduleState();
       drawNightArc();
     }
   });
@@ -623,6 +637,7 @@ function startAppListeners() {
   });
 
   renderSchedule();
+  renderScheduleState();
   drawNightArc();
   setInterval(drawNightArc, 60000);
 
@@ -868,26 +883,57 @@ function renderSchedule() {
 
   scheduleRowsEl.querySelectorAll('.schedEnable').forEach(el => el.addEventListener('change', e => {
     schedule[+e.target.dataset.i].enabled = e.target.checked;
+    markScheduleDirty();
     renderSchedule(); drawNightArc();
   }));
   scheduleRowsEl.querySelectorAll('.schedStart').forEach(el => el.addEventListener('change', e => {
-    schedule[+e.target.dataset.i].start = e.target.value; drawNightArc();
+    schedule[+e.target.dataset.i].start = e.target.value;
+    markScheduleDirty();
+    drawNightArc();
   }));
   scheduleRowsEl.querySelectorAll('.schedEnd').forEach(el => el.addEventListener('change', e => {
-    schedule[+e.target.dataset.i].end = e.target.value; drawNightArc();
+    schedule[+e.target.dataset.i].end = e.target.value;
+    markScheduleDirty();
+    drawNightArc();
   }));
   scheduleRowsEl.querySelectorAll('.schedTempUp').forEach(el => el.addEventListener('click', e => {
     const i=+e.target.dataset.i; schedule[i].targetTemp = Math.min(30, schedule[i].targetTemp+1);
+    markScheduleDirty();
     renderSchedule();
   }));
   scheduleRowsEl.querySelectorAll('.schedTempDown').forEach(el => el.addEventListener('click', e => {
     const i=+e.target.dataset.i; schedule[i].targetTemp = Math.max(16, schedule[i].targetTemp-1);
+    markScheduleDirty();
     renderSchedule();
   }));
 }
 
+function markScheduleDirty() {
+  scheduleDirty = true;
+  renderScheduleState();
+}
+function clearScheduleDirty() {
+  scheduleDirty = false;
+  renderScheduleState();
+}
+function renderScheduleState() {
+  const badge = document.getElementById('scheduleSaveState');
+  const note = document.getElementById('scheduleStatusNote');
+  if (!badge || !note) return;
+  if (scheduleDirty) {
+    badge.textContent = 'Unsaved changes';
+    badge.className = 'status-badge unsaved';
+    note.textContent = 'Remember to press Save schedule to sync your changes.';
+  } else {
+    badge.textContent = 'Schedule saved';
+    badge.className = 'status-badge saved';
+    note.textContent = 'Your schedule is synced with Firebase.';
+  }
+}
+
 document.getElementById('saveScheduleBtn').addEventListener('click', async () => {
   await set(ref(db,'ac/schedule'), schedule);
+  clearScheduleDirty();
   const flash = document.getElementById('schedSaveFlash');
   flash.classList.add('show');
   setTimeout(()=>flash.classList.remove('show'), 1600);
