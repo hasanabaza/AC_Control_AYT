@@ -654,11 +654,21 @@ function renderHero() {
     tempEl.textContent = '--';
   }
 
+  // Determine the current set temperature: prefer explicit command (manualDraft),
+  // then status.temp if device provides it, else unknown.
+  let setTemp = '--';
+  if (manualDraft && typeof manualDraft.temp === 'number') setTemp = manualDraft.temp.toFixed(0);
+  else if (latestStatus && typeof latestStatus.temp === 'number') setTemp = latestStatus.temp.toFixed(0);
+
   if (latestStatus && latestStatus.power) {
     const on = latestStatus.power === 'on';
-    stateEl.textContent = on
-      ? `Cooling · ${latestStatus.temp ?? '--'}°C`
-      : 'Off';
+    if (on) {
+      stateEl.textContent = `Cooling · ${setTemp}°C`;
+    } else {
+      // AC is off but show the currently set temperature and mode
+      const mode = (manualDraft && manualDraft.mode) ? manualDraft.mode : (latestStatus.mode || '—');
+      stateEl.textContent = `Off · set ${setTemp}°C · ${mode}`;
+    }
     stateEl.classList.toggle('on', on);
   } else {
     stateEl.textContent = 'Unknown';
