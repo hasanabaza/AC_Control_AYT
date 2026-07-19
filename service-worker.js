@@ -40,9 +40,16 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request)
         .then((res) => {
-          // Update cache with fresh response
+          // Update cache with fresh response — only for http/https requests
           const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          try {
+            const reqUrl = new URL(event.request.url);
+            if (reqUrl.protocol === 'http:' || reqUrl.protocol === 'https:') {
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            }
+          } catch (e) {
+            // URL parsing failed; skip caching
+          }
           return res;
         })
         .catch(() => caches.match(event.request))
@@ -55,7 +62,14 @@ self.addEventListener('fetch', (event) => {
     fetch(event.request)
       .then((res) => {
         const clone = res.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        try {
+          const reqUrl = new URL(event.request.url);
+          if (reqUrl.protocol === 'http:' || reqUrl.protocol === 'https:') {
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+        } catch (e) {
+          // skip caching if URL has unsupported scheme (e.g., chrome-extension://)
+        }
         return res;
       })
       .catch(() => caches.match(event.request))
