@@ -400,6 +400,13 @@ const appScreen = document.getElementById('appScreen');
 const loginBtn = document.getElementById('loginBtn');
 const loginError = document.getElementById('loginError');
 
+const configHasPlaceholders = Object.values(firebaseConfig).some(v => typeof v === 'string' && v.includes('REPLACE_ME'));
+if (configHasPlaceholders) {
+  console.error('Firebase config still contains placeholder values. Update index.html and redeploy to GitHub Pages.');
+  loginError.textContent = 'Firebase config is not ready. Update the web config and redeploy the site.';
+  loginBtn.disabled = true;
+}
+
 setPersistence(auth, browserLocalPersistence).catch(()=>{});
 
 loginBtn.addEventListener('click', async () => {
