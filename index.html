@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Night Cool · AC Control</title>
+<meta name="theme-color" content="#0A1120">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230A1120'/%3E%3Cpath d='M30 55a20 20 0 1 0 20-30 15 15 0 1 1-20 30z' fill='%234FD1C5'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230A1120'/%3E%3Cpath d='M30 55a20 20 0 1 0 20-30 15 15 0 1 1-20 30z' fill='%234FD1C5'/%3E%3C/svg%3E">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+
+<style>
+  :root{
+    --bg:#0A1120;
+    --bg-grad-top:#0D1730;
+    --surface:#121A2E;
+    --surface-2:#1B2540;
+    --border:#263353;
+    --text:#E7ECF7;
+    --text-muted:#8B96B3;
+    --cool:#4FD1C5;
+    --cool-dim:#1E4A47;
+    --warm:#F2A65A;
+    --warm-dim:#4A3A20;
+    --danger:#F26D6D;
+    --danger-dim:#4A2226;
+    --radius:18px;
+    --radius-sm:12px;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, var(--bg-grad-top), var(--bg) 60%);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:48px;
+  }
+  h1,h2,h3{font-family:'Sora',sans-serif;margin:0;letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  button{font-family:inherit;}
+  a{color:var(--cool);}
+
+  /* ---------- Login ---------- */
+  #loginScreen{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:36px;
+  }
+  .brand-mark{
+    width:38px;height:38px;border-radius:11px;
+    background:linear-gradient(160deg,var(--cool),#2f9e93);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 24px rgba(79,209,197,0.35);
+  }
+  .brand-mark svg{width:20px;height:20px;}
+  .brand-name{font-size:1.05rem;font-weight:700;}
+  .brand-sub{font-size:0.75rem;color:var(--text-muted);margin-top:-2px;}
+
+  .login-card{
+    width:100%;max-width:360px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:28px 24px;
+  }
+  .login-card h1{font-size:1.3rem;margin-bottom:6px;}
+  .login-card p.sub{color:var(--text-muted);font-size:0.85rem;margin:0 0 22px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:6px;}
+  .field input{
+    width:100%;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:12px 14px;
+    color:var(--text);
+    font-size:0.95rem;
+    outline:none;
+  }
+  .field input:focus{border-color:var(--cool);}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border:none;border-radius:var(--radius-sm);
+    padding:13px 18px;
+    font-weight:600;font-size:0.92rem;
+    cursor:pointer;
+    transition:transform .08s ease, opacity .15s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn:focus-visible{outline:2px solid var(--cool);outline-offset:2px;}
+  .btn-primary{background:var(--cool);color:#06231F;width:100%;margin-top:6px;}
+  .btn-primary[disabled]{opacity:0.55;cursor:not-allowed;}
+  .btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border);}
+  .error-text{color:var(--danger);font-size:0.82rem;margin-top:10px;min-height:1.2em;}
+  .remember-row{display:flex;align-items:center;gap:8px;margin:4px 0 4px;font-size:0.82rem;color:var(--text-muted);}
+
+  /* ---------- App shell ---------- */
+  #appScreen{display:none;max-width:480px;margin:0 auto;padding:18px 16px 0;}
+  header.appbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:6px 2px 18px;
+  }
+  .status-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:0.72rem;font-weight:600;
+    padding:5px 10px;border-radius:99px;
+    background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);
+  }
+  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--text-muted);}
+  .status-pill.online .status-dot{background:var(--cool);box-shadow:0 0 8px var(--cool);}
+  .status-pill.online{color:var(--cool);}
+  .status-pill.offline .status-dot{background:var(--danger);}
+  .status-pill.offline{color:var(--danger);}
+  .icon-btn{
+    background:var(--surface-2);border:1px solid var(--border);
+    width:34px;height:34px;border-radius:10px;color:var(--text-muted);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+
+  /* Safety banner */
+  #safetyBanner{
+    display:none;
+    background:linear-gradient(135deg,var(--danger-dim),var(--surface));
+    border:1px solid var(--danger);
+    color:#FFD9D9;
+    border-radius:var(--radius);
+    padding:14px 16px;margin-bottom:16px;
+    font-size:0.85rem;line-height:1.4;
+  }
+  #safetyBanner b{display:block;font-size:0.9rem;margin-bottom:2px;color:#fff;}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:16px;
+  }
+  .card h2{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:600;margin-bottom:14px;}
+
+  /* Hero */
+  .hero{
+    display:flex;align-items:flex-end;justify-content:space-between;
+  }
+  .hero-temp{font-size:3.4rem;font-weight:700;line-height:1;}
+  .hero-temp span{font-size:1.4rem;font-weight:500;color:var(--text-muted);}
+  .hero-meta{text-align:right;}
+  .hero-state{font-weight:600;font-size:0.95rem;}
+  .hero-state.on{color:var(--cool);}
+  .hero-updated{font-size:0.72rem;color:var(--text-muted);margin-top:4px;}
+
+  /* Night Arc */
+  .arc-wrap{position:relative;height:96px;border-radius:14px;overflow:hidden;margin-top:4px;}
+  .arc-wrap svg{display:block;width:100%;height:100%;}
+  .arc-labels{display:flex;justify-content:space-between;font-size:0.65rem;color:var(--text-muted);margin-top:6px;font-family:'JetBrains Mono',monospace;}
+
+  /* Auto/manual switch */
+  .mode-switch{display:flex;background:var(--surface-2);border:1px solid var(--border);border-radius:99px;padding:4px;margin-top:16px;}
+  .mode-switch button{
+    flex:1;border:none;background:transparent;color:var(--text-muted);
+    padding:9px 0;border-radius:99px;font-weight:600;font-size:0.82rem;cursor:pointer;
+  }
+  .mode-switch button.active{background:var(--cool);color:#06231F;}
+
+  /* Schedule rows */
+  .sched-row{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 0;border-top:1px solid var(--border);
+  }
+  .sched-row:first-of-type{border-top:none;}
+  .sched-row.disabled{opacity:0.4;}
+  .sched-toggle{flex:0 0 auto;}
+  .sched-toggle input{width:18px;height:18px;accent-color:var(--cool);}
+  .sched-times{display:flex;align-items:center;gap:6px;flex:1;}
+  .sched-times input[type=time]{
+    background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+    color:var(--text);padding:7px 6px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;width:98px;
+  }
+  .sched-arrow{color:var(--text-muted);font-size:0.8rem;}
+  .sched-temp{display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;flex:0 0 auto;}
+  .stepper{display:flex;align-items:center;gap:6px;}
+  .stepper button{
+    width:26px;height:26px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);
+    color:var(--text);font-size:0.95rem;cursor:pointer;
+  }
+
+  /* Manual controls */
+  .manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .manual-grid .full{grid-column:1/-1;}
+  .ctrl-label{font-size:0.72rem;color:var(--text-muted);margin-bottom:6px;}
+  .power-row{display:flex;align-items:center;justify-content:space-between;}
+  .switch{position:relative;width:48px;height:28px;border-radius:99px;background:var(--surface-2);border:1px solid var(--border);cursor:pointer;}
+  .switch::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:var(--text-muted);transition:transform .15s ease, background .15s ease;}
+  .switch.on{background:var(--cool-dim);border-color:var(--cool);}
+  .switch.on::after{transform:translateX(20px);background:var(--cool);}
+  .temp-stepper{display:flex;align-items:center;justify-content:center;gap:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 0;}
+  .temp-stepper button{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:1.2rem;cursor:pointer;}
+  .temp-stepper .val{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:600;min-width:56px;text-align:center;}
+  select.pill-select{
+    width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+    border-radius:var(--radius-sm);padding:11px 10px;font-size:0.88rem;font-family:inherit;
+  }
+  .manual-grid.disabled{opacity:0.4;pointer-events:none;}
+  .manual-note{font-size:0.72rem;color:var(--text-muted);margin-top:10px;}
+
+  .save-row{display:flex;justify-content:flex-end;margin-top:14px;}
+  .btn-save{background:var(--surface-2);border:1px solid var(--cool);color:var(--cool);padding:9px 16px;font-size:0.82rem;border-radius:99px;}
+  .btn-save:active{transform:scale(0.97);}
+  .save-flash{color:var(--cool);font-size:0.75rem;align-self:center;margin-right:10px;opacity:0;transition:opacity .2s ease;}
+  .save-flash.show{opacity:1;}
+
+  canvas#historyChart{max-height:220px;}
+
+  .footer-note{text-align:center;color:var(--text-muted);font-size:0.7rem;margin-top:20px;padding-bottom:20px;}
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;animation:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginScreen">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 13a7 7 0 1 0 7-11 5.2 5.2 0 1 1-7 11z" fill="#06231F"/></svg>
+    </div>
+    <div>
+      <div class="brand-name">Night Cool</div>
+      <div class="brand-sub">AC control</div>
+    </div>
+  </div>
+
+  <div class="login-card">
+    <h1>Sign in</h1>
+    <p class="sub">Use the shared account to control the AC from anywhere.</p>
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary" id="loginBtn">Sign in</button>
+    <div class="error-text" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="appScreen">
+  <header class="appbar">
+    <div class="status-pill offline" id="statusPill">
+      <span class="status-dot"></span><span id="statusText">Checking…</span>
+    </div>
+    <button class="icon-btn" id="logoutBtn" title="Sign out">⏻</button>
+  </header>
+
+  <div id="safetyBanner">
+    <b>⚠ Room is warm and the AC isn't responding</b>
+    <span id="safetyBannerText"></span>
+  </div>
+
+  <!-- Hero -->
+  <div class="card">
+    <div class="hero">
+      <div class="hero-temp mono"><span id="currentTemp">--</span><span>°C</span></div>
+      <div class="hero-meta">
+        <div class="hero-state" id="acStateLabel">Unknown</div>
+        <div class="hero-updated" id="lastUpdated">Waiting for device…</div>
+      </div>
+    </div>
+
+    <div class="arc-wrap" id="arcWrap">
+      <svg id="nightArc" viewBox="0 0 300 96" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="arc-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+
+    <div class="mode-switch">
+      <button id="modeAutoBtn">Auto</button>
+      <button id="modeManualBtn">Manual</button>
+    </div>
+  </div>
+
+  <!-- Schedule -->
+  <div class="card">
+    <h2>Night schedule</h2>
+    <div id="scheduleRows"></div>
+    <div class="save-row">
+      <span class="save-flash" id="schedSaveFlash">Saved</span>
+      <button class="btn btn-save" id="saveScheduleBtn">Save schedule</button>
+    </div>
+  </div>
+
+  <!-- Manual controls -->
+  <div class="card">
+    <h2>Manual control</h2>
+    <div class="manual-grid" id="manualGrid">
+      <div class="full power-row">
+        <span class="ctrl-label" style="margin:0;">Power</span>
+        <div class="switch" id="powerSwitch"></div>
+      </div>
+      <div class="full">
+        <div class="ctrl-label">Target temperature</div>
+        <div class="temp-stepper">
+          <button id="tempDown">–</button>
+          <div class="val mono" id="tempVal">24°</div>
+          <button id="tempUp">+</button>
+        </div>
+      </div>
+      <div>
+        <div class="ctrl-label">Mode</div>
+        <select class="pill-select" id="modeSelect">
+          <option value="cool">Cool</option>
+          <option value="fan">Fan</option>
+          <option value="dry">Dry</option>
+          <option value="auto">Auto</option>
+        </select>
+      </div>
+      <div>
+        <div class="ctrl-label">Fan speed</div>
+        <select class="pill-select" id="fanSelect">
+          <option value="auto">Auto</option>
+          <option value="low">Low</option>
+          <option value="med">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+    </div>
+    <div class="manual-note" id="manualNote">Auto mode is on — switch to Manual to control the AC directly.</div>
+  </div>
+
+  <!-- History -->
+  <div class="card">
+    <h2>Last 24 hours</h2>
+    <canvas id="historyChart"></canvas>
+  </div>
+
+  <div class="footer-note">Night Cool · connected via Firebase</div>
+</div>
+
+<!-- ===================== FIREBASE ===================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,
+  setPersistence, browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getDatabase, ref, onValue, set, get, query, limitToLast
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// ---------------------------------------------------------------
+// TODO: replace with your Firebase project's web config
+// (Firebase console → Project settings → Your apps → SDK setup)
+// ---------------------------------------------------------------
+const firebaseConfig = {
+  apiKey: "AIzaSyCZSpKfPC0K9KVnf5BnfJBHfGtaAHWDIWI",
+  authDomain: "ac-control-ayt.firebaseapp.com",
+  databaseURL: "https://ac-control-ayt-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "ac-control-ayt",
+  storageBucket: "ac-control-ayt.firebasestorage.app",
+  messagingSenderId: "11363048858",
+  appId: "1:11363048858:web:9d42ac960e407f4fe2ae23"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// ---------------- Auth ----------------
+const loginScreen = document.getElementById('loginScreen');
+const appScreen = document.getElementById('appScreen');
+const loginBtn = document.getElementById('loginBtn');
+const loginError = document.getElementById('loginError');
+
+setPersistence(auth, browserLocalPersistence).catch(()=>{});
+
+loginBtn.addEventListener('click', async () => {
+  loginError.textContent = '';
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Signing in…';
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (err) {
+    loginError.textContent = 'Could not sign in. Check the email and password.';
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Sign in';
+  }
+});
+
+document.getElementById('password').addEventListener('keydown', (e)=>{
+  if (e.key === 'Enter') loginBtn.click();
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    loginScreen.style.display = 'none';
+    appScreen.style.display = 'block';
+    startAppListeners();
+  } else {
+    loginScreen.style.display = 'flex';
+    appScreen.style.display = 'none';
+  }
+});
+
+// ---------------- App state ----------------
+let latestSensor = null;      // {temp, timestamp}
+let latestStatus = null;      // last-known AC state (from device)
+let latestHeartbeat = 0;
+let autoEnabled = true;
+let schedule = [
+  {enabled:true,  start:"22:00", end:"07:00", targetTemp:26},
+  {enabled:false, start:"13:00", end:"15:00", targetTemp:26},
+  {enabled:false, start:"00:00", end:"00:00", targetTemp:26},
+  {enabled:false, start:"00:00", end:"00:00", targetTemp:26}
+];
+let manualDraft = {power:"off", temp:24, mode:"cool", fan:"auto"};
+let historyPoints = []; // [{t, temp, acOn}]
+let listenersStarted = false;
+const HEARTBEAT_STALE_MS = 90 * 1000;
+const SAFETY_TEMP_C = 32;
+
+function startAppListeners() {
+  if (listenersStarted) return;
+  listenersStarted = true;
+
+  onValue(ref(db, 'ac/sensor'), (snap) => {
+    latestSensor = snap.val();
+    renderHero();
+    checkSafety();
+  });
+
+  onValue(ref(db, 'ac/status'), (snap) => {
+    latestStatus = snap.val();
+    renderHero();
+    checkSafety();
+  });
+
+  onValue(ref(db, 'ac/heartbeat'), (snap) => {
+    latestHeartbeat = snap.val() || 0;
+    renderConnection();
+    checkSafety();
+  });
+  setInterval(renderConnection, 15000);
+  setInterval(checkSafety, 15000);
+
+  onValue(ref(db, 'ac/auto'), (snap) => {
+    const v = snap.val();
+    autoEnabled = v && typeof v.enabled === 'boolean' ? v.enabled : true;
+    renderModeSwitch();
+  });
+
+  onValue(ref(db, 'ac/schedule'), (snap) => {
+    const v = snap.val();
+    if (Array.isArray(v) && v.length) {
+      schedule = [0,1,2,3].map(i => v[i] || schedule[i]);
+      renderSchedule();
+      drawNightArc();
+    }
+  });
+
+  onValue(ref(db, 'ac/command'), (snap) => {
+    const v = snap.val();
+    if (v) {
+      manualDraft = {
+        power: v.power || manualDraft.power,
+        temp: typeof v.temp === 'number' ? v.temp : manualDraft.temp,
+        mode: v.mode || manualDraft.mode,
+        fan: v.fan || manualDraft.fan
+      };
+      renderManual();
+    }
+  });
+
+  const histQuery = query(ref(db, 'ac/history'), limitToLast(300));
+  onValue(histQuery, (snap) => {
+    const val = snap.val() || {};
+    historyPoints = Object.entries(val)
+      .map(([k, v]) => ({ t: Number(v.timestamp || k), temp: v.temp, acOn: !!v.acOn }))
+      .filter(p => Number.isFinite(p.t) && typeof p.temp === 'number')
+      .sort((a,b) => a.t - b.t);
+    const cutoff = Date.now() - 24*60*60*1000;
+    historyPoints = historyPoints.filter(p => p.t >= cutoff);
+    renderChart();
+    drawNightArc();
+  });
+
+  renderSchedule();
+  drawNightArc();
+  setInterval(drawNightArc, 60000);
+}
+
+// ---------------- Rendering: hero + connection ----------------
+function renderHero() {
+  const tempEl = document.getElementById('currentTemp');
+  const stateEl = document.getElementById('acStateLabel');
+  const updatedEl = document.getElementById('lastUpdated');
+
+  if (latestSensor && typeof latestSensor.temp === 'number') {
+    tempEl.textContent = latestSensor.temp.toFixed(1);
+  } else {
+    tempEl.textContent = '--';
+  }
+
+  if (latestStatus && latestStatus.power) {
+    const on = latestStatus.power === 'on';
+    stateEl.textContent = on
+      ? `Cooling · ${latestStatus.temp ?? '--'}°C`
+      : 'Off';
+    stateEl.classList.toggle('on', on);
+  } else {
+    stateEl.textContent = 'Unknown';
+    stateEl.classList.remove('on');
+  }
+
+  const ts = (latestSensor && latestSensor.timestamp) || 0;
+  updatedEl.textContent = ts ? `Updated ${timeAgo(ts)}` : 'Waiting for device…';
+}
+
+function renderConnection() {
+  const pill = document.getElementById('statusPill');
+  const text = document.getElementById('statusText');
+  const stale = !latestHeartbeat || (Date.now() - latestHeartbeat) > HEARTBEAT_STALE_MS;
+  pill.classList.toggle('online', !stale);
+  pill.classList.toggle('offline', stale);
+  text.textContent = stale
+    ? (latestHeartbeat ? `Offline since ${formatTime(latestHeartbeat)}` : 'Offline')
+    : 'Online';
+}
+
+function checkSafety() {
+  const banner = document.getElementById('safetyBanner');
+  const bannerText = document.getElementById('safetyBannerText');
+  const stale = !latestHeartbeat || (Date.now() - latestHeartbeat) > HEARTBEAT_STALE_MS;
+  const hot = latestSensor && typeof latestSensor.temp === 'number' && latestSensor.temp > SAFETY_TEMP_C;
+  const show = autoEnabled && hot && stale;
+  banner.style.display = show ? 'block' : 'none';
+  if (show) {
+    bannerText.textContent = `Room is at ${latestSensor.temp.toFixed(1)}°C and Auto mode is on, but the device hasn't checked in ${latestHeartbeat ? 'since ' + formatTime(latestHeartbeat) : ''}. Check the AC in person if possible.`;
+  }
+}
+
+function timeAgo(ts) {
+  const s = Math.max(0, Math.round((Date.now() - ts) / 1000));
+  if (s < 60) return `${s}s ago`;
+  if (s < 3600) return `${Math.round(s/60)}m ago`;
+  return `${Math.round(s/3600)}h ago`;
+}
+function formatTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+function timeToMinutes(hhmm) {
+  const [h,m] = hhmm.split(':').map(Number);
+  return h*60+m;
+}
+
+// ---------------- Mode switch ----------------
+const modeAutoBtn = document.getElementById('modeAutoBtn');
+const modeManualBtn = document.getElementById('modeManualBtn');
+function renderModeSwitch() {
+  modeAutoBtn.classList.toggle('active', autoEnabled);
+  modeManualBtn.classList.toggle('active', !autoEnabled);
+  document.getElementById('manualGrid').classList.toggle('disabled', autoEnabled);
+  document.getElementById('manualNote').style.display = autoEnabled ? 'block' : 'none';
+}
+modeAutoBtn.addEventListener('click', () => set(ref(db,'ac/auto'), {enabled:true}));
+modeManualBtn.addEventListener('click', () => set(ref(db,'ac/auto'), {enabled:false}));
+
+// ---------------- Night Arc (signature visual) ----------------
+function drawNightArc() {
+  const svg = document.getElementById('nightArc');
+  const W = 300, H = 96;
+  let parts = [];
+
+  // Day/night gradient background, tied to real 24h axis
+  parts.push(`
+    <defs>
+      <linearGradient id="dayNight" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"  stop-color="#0A1120"/>
+        <stop offset="25%" stop-color="#16233F"/>
+        <stop offset="50%" stop-color="#2C3F63"/>
+        <stop offset="75%" stop-color="#16233F"/>
+        <stop offset="100%" stop-color="#0A1120"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="${W}" height="${H}" fill="url(#dayNight)"/>
+  `);
+
+  // hour gridlines
+  for (let h=0; h<=24; h+=3) {
+    const x = (h/24)*W;
+    parts.push(`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#263353" stroke-width="1" opacity="0.5"/>`);
+  }
+
+  // scheduled cool blocks (teal bands), handles overnight wrap (end < start)
+  schedule.forEach(b => {
+    if (!b.enabled) return;
+    const s = timeToMinutes(b.start), e = timeToMinutes(b.end);
+    const bandY = 8, bandH = 34;
+    if (e > s) {
+      parts.push(band(s,e));
+    } else {
+      parts.push(band(s,1440));
+      parts.push(band(0,e));
+    }
+    function band(from,to){
+      const x1=(from/1440)*W, x2=(to/1440)*W;
+      return `<rect x="${x1}" y="${bandY}" width="${Math.max(2,x2-x1)}" height="${bandH}" rx="4" fill="var(--cool)" opacity="0.55"/>`;
+    }
+  });
+
+  // actual recorded temperature line + AC-on glow from history (last 24h mapped onto 0-1440 "today" axis by time-of-day)
+  if (historyPoints.length > 1) {
+    const temps = historyPoints.map(p=>p.temp);
+    const minT = Math.min(...temps), maxT = Math.max(...temps);
+    const range = Math.max(1, maxT-minT);
+    const lineY = 66, lineH = 22;
+    let path = '';
+    historyPoints.forEach((p,i) => {
+      const d = new Date(p.t);
+      const minutesOfDay = d.getHours()*60 + d.getMinutes();
+      const x = (minutesOfDay/1440)*W;
+      const y = lineY + lineH - ((p.temp-minT)/range)*lineH;
+      path += (i===0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+    });
+    parts.push(`<path d="${path}" fill="none" stroke="var(--warm)" stroke-width="2" opacity="0.85"/>`);
+  }
+
+  // current time marker
+  const now = new Date();
+  const nowX = ((now.getHours()*60+now.getMinutes())/1440)*W;
+  parts.push(`<line x1="${nowX}" y1="0" x2="${nowX}" y2="${H}" stroke="#E7ECF7" stroke-width="1.5"/>`);
+  parts.push(`<circle cx="${nowX}" cy="4" r="3" fill="#E7ECF7"/>`);
+
+  svg.innerHTML = parts.join('');
+}
+
+// ---------------- Schedule editor ----------------
+const scheduleRowsEl = document.getElementById('scheduleRows');
+function renderSchedule() {
+  scheduleRowsEl.innerHTML = '';
+  schedule.forEach((block, i) => {
+    const row = document.createElement('div');
+    row.className = 'sched-row' + (block.enabled ? '' : ' disabled');
+    row.innerHTML = `
+      <div class="sched-toggle"><input type="checkbox" data-i="${i}" class="schedEnable" ${block.enabled?'checked':''}></div>
+      <div class="sched-times">
+        <input type="time" class="schedStart" data-i="${i}" value="${block.start}">
+        <span class="sched-arrow">→</span>
+        <input type="time" class="schedEnd" data-i="${i}" value="${block.end}">
+      </div>
+      <div class="sched-temp">
+        <div class="stepper">
+          <button class="schedTempDown" data-i="${i}">–</button>
+          <span>${block.targetTemp}°</span>
+          <button class="schedTempUp" data-i="${i}">+</button>
+        </div>
+      </div>
+    `;
+    scheduleRowsEl.appendChild(row);
+  });
+
+  scheduleRowsEl.querySelectorAll('.schedEnable').forEach(el => el.addEventListener('change', e => {
+    schedule[+e.target.dataset.i].enabled = e.target.checked;
+    renderSchedule(); drawNightArc();
+  }));
+  scheduleRowsEl.querySelectorAll('.schedStart').forEach(el => el.addEventListener('change', e => {
+    schedule[+e.target.dataset.i].start = e.target.value; drawNightArc();
+  }));
+  scheduleRowsEl.querySelectorAll('.schedEnd').forEach(el => el.addEventListener('change', e => {
+    schedule[+e.target.dataset.i].end = e.target.value; drawNightArc();
+  }));
+  scheduleRowsEl.querySelectorAll('.schedTempUp').forEach(el => el.addEventListener('click', e => {
+    const i=+e.target.dataset.i; schedule[i].targetTemp = Math.min(30, schedule[i].targetTemp+1);
+    renderSchedule();
+  }));
+  scheduleRowsEl.querySelectorAll('.schedTempDown').forEach(el => el.addEventListener('click', e => {
+    const i=+e.target.dataset.i; schedule[i].targetTemp = Math.max(16, schedule[i].targetTemp-1);
+    renderSchedule();
+  }));
+}
+
+document.getElementById('saveScheduleBtn').addEventListener('click', async () => {
+  await set(ref(db,'ac/schedule'), schedule);
+  const flash = document.getElementById('schedSaveFlash');
+  flash.classList.add('show');
+  setTimeout(()=>flash.classList.remove('show'), 1600);
+});
+
+// ---------------- Manual controls ----------------
+function renderManual() {
+  document.getElementById('powerSwitch').classList.toggle('on', manualDraft.power === 'on');
+  document.getElementById('tempVal').textContent = `${manualDraft.temp}°`;
+  document.getElementById('modeSelect').value = manualDraft.mode;
+  document.getElementById('fanSelect').value = manualDraft.fan;
+}
+function sendCommand(partial) {
+  manualDraft = {...manualDraft, ...partial};
+  renderManual();
+  set(ref(db,'ac/command'), {...manualDraft, timestamp: Date.now()});
+}
+document.getElementById('powerSwitch').addEventListener('click', () => {
+  sendCommand({power: manualDraft.power === 'on' ? 'off' : 'on'});
+});
+document.getElementById('tempUp').addEventListener('click', () => {
+  sendCommand({temp: Math.min(30, manualDraft.temp+1)});
+});
+document.getElementById('tempDown').addEventListener('click', () => {
+  sendCommand({temp: Math.max(16, manualDraft.temp-1)});
+});
+document.getElementById('modeSelect').addEventListener('change', e => sendCommand({mode: e.target.value}));
+document.getElementById('fanSelect').addEventListener('change', e => sendCommand({fan: e.target.value}));
+
+renderModeSwitch();
+renderManual();
+
+// ---------------- Chart ----------------
+let chart;
+function renderChart() {
+  const ctx = document.getElementById('historyChart');
+  const labels = historyPoints.map(p => new Date(p.t));
+  const data = historyPoints.map(p => p.temp);
+
+  const acOnShading = {
+    id: 'acOnShading',
+    beforeDatasetsDraw(c) {
+      const {ctx, chartArea, scales} = c;
+      if (!chartArea) return;
+      ctx.save();
+      ctx.fillStyle = 'rgba(79,209,197,0.12)';
+      let runStart = null;
+      historyPoints.forEach((p, i) => {
+        if (p.acOn && runStart === null) runStart = i;
+        const ending = (!p.acOn || i === historyPoints.length-1) && runStart !== null;
+        if (ending) {
+          const endIdx = p.acOn ? i : i-1;
+          if (endIdx >= runStart) {
+            const x1 = scales.x.getPixelForValue(labels[runStart]);
+            const x2 = scales.x.getPixelForValue(labels[endIdx]);
+            ctx.fillRect(x1, chartArea.top, Math.max(1,x2-x1), chartArea.bottom-chartArea.top);
+          }
+          runStart = null;
+        }
+      });
+      ctx.restore();
+    }
+  };
+
+  const cfg = {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#F2A65A',
+        backgroundColor: 'rgba(242,166,90,0.08)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: false,
+      plugins: { legend: {display:false} },
+      scales: {
+        x: {
+          type: 'time',
+          time: { unit: 'hour' },
+          ticks: { color: '#8B96B3', font:{family:"'JetBrains Mono', monospace", size:10} },
+          grid: { color: '#263353' }
+        },
+        y: {
+          ticks: { color: '#8B96B3', font:{family:"'JetBrains Mono', monospace", size:10} },
+          grid: { color: '#263353' }
+        }
+      }
+    },
+    plugins: [acOnShading]
+  };
+
+  if (chart) { chart.data = cfg.data; chart.update(); }
+  else { chart = new Chart(ctx, cfg); }
+}
+</script>
+
+<!-- Chart.js date adapter (for time-scale x axis) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-moment/1.0.1/chartjs-adapter-moment.min.js"></script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+    });
+  }
+</script>
+</body>
+</html>
