@@ -229,6 +229,10 @@
   .save-flash{color:var(--cool);font-size:0.75rem;align-self:center;margin-right:10px;opacity:0;transition:opacity .2s ease;}
   .save-flash.show{opacity:1;}
 
+  .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cool);margin-right:6px;box-shadow:0 0 8px var(--cool);animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.2);opacity:0.7;}}
+  .live-tag{display:inline-flex;align-items:center;font-size:0.72rem;color:var(--cool);margin-top:6px;}
+
   canvas#historyChart{max-height:220px;}
 
   .footer-note{text-align:center;color:var(--text-muted);font-size:0.7rem;margin-top:20px;padding-bottom:20px;}
@@ -289,6 +293,7 @@
       <div class="hero-meta">
         <div class="hero-state" id="acStateLabel">Unknown</div>
         <div class="hero-updated" id="lastUpdated">Waiting for device…</div>
+        <div class="live-tag" id="liveTag" style="display:none;"><span class="live-dot"></span>Live update</div>
       </div>
     </div>
 
@@ -376,13 +381,13 @@ import {
 // (Firebase console → Project settings → Your apps → SDK setup)
 // ---------------------------------------------------------------
 const firebaseConfig = {
-  apiKey: "REPLACE_ME",
-  authDomain: "REPLACE_ME.firebaseapp.com",
-  databaseURL: "https://REPLACE_ME-default-rtdb.firebaseio.com",
-  projectId: "REPLACE_ME",
-  storageBucket: "REPLACE_ME.appspot.com",
-  messagingSenderId: "REPLACE_ME",
-  appId: "REPLACE_ME"
+  apiKey: "AIzaSyCZSpKfPC0K9KVnf5BnfJBHfGtaAHWDIWI",
+  authDomain: "ac-control-ayt.firebaseapp.com",
+  databaseURL: "https://ac-control-ayt-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "ac-control-ayt",
+  storageBucket: "ac-control-ayt.firebasestorage.app",
+  messagingSenderId: "11363048858",
+  appId: "1:11363048858:web:9d42ac960e407f4fe2ae23"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -406,7 +411,8 @@ loginBtn.addEventListener('click', async () => {
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (err) {
-    loginError.textContent = 'Could not sign in. Check the email and password.';
+    console.error(err);
+    loginError.textContent = err?.message || 'Could not sign in. Check the email and password.';
   } finally {
     loginBtn.disabled = false;
     loginBtn.textContent = 'Sign in';
@@ -435,6 +441,7 @@ let latestSensor = null;      // {temp, timestamp}
 let latestStatus = null;      // last-known AC state (from device)
 let latestHeartbeat = 0;
 let autoEnabled = true;
+let lastLiveUpdateAt = 0;
 let schedule = [
   {enabled:true,  start:"22:00", end:"07:00", targetTemp:26},
   {enabled:false, start:"13:00", end:"15:00", targetTemp:26},
@@ -453,18 +460,21 @@ function startAppListeners() {
 
   onValue(ref(db, 'ac/sensor'), (snap) => {
     latestSensor = snap.val();
+    lastLiveUpdateAt = Date.now();
     renderHero();
     checkSafety();
   });
 
   onValue(ref(db, 'ac/status'), (snap) => {
     latestStatus = snap.val();
+    lastLiveUpdateAt = Date.now();
     renderHero();
     checkSafety();
   });
 
   onValue(ref(db, 'ac/heartbeat'), (snap) => {
     latestHeartbeat = snap.val() || 0;
+    lastLiveUpdateAt = Date.now();
     renderConnection();
     checkSafety();
   });
@@ -522,6 +532,7 @@ function renderHero() {
   const tempEl = document.getElementById('currentTemp');
   const stateEl = document.getElementById('acStateLabel');
   const updatedEl = document.getElementById('lastUpdated');
+  const liveTag = document.getElementById('liveTag');
 
   if (latestSensor && typeof latestSensor.temp === 'number') {
     tempEl.textContent = latestSensor.temp.toFixed(1);
@@ -542,6 +553,13 @@ function renderHero() {
 
   const ts = (latestSensor && latestSensor.timestamp) || 0;
   updatedEl.textContent = ts ? `Updated ${timeAgo(ts)}` : 'Waiting for device…';
+
+  if (lastLiveUpdateAt) {
+    liveTag.style.display = 'inline-flex';
+    liveTag.textContent = `Live update · ${new Date(lastLiveUpdateAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`;
+  } else {
+    liveTag.style.display = 'none';
+  }
 }
 
 function renderConnection() {
