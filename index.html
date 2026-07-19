@@ -504,7 +504,11 @@ function startAppListeners() {
   });
 
   onValue(ref(db, 'ac/heartbeat'), (snap) => {
-    latestHeartbeat = snap.val() || 0;
+    // Device may write heartbeat in seconds (ESP code uses seconds). Convert
+    // to milliseconds for Date comparisons if needed.
+    let hb = snap.val() || 0;
+    if (hb && typeof hb === 'number' && hb < 1e12) hb = hb * 1000; // seconds -> ms
+    latestHeartbeat = hb;
     lastLiveUpdateAt = Date.now();
     renderConnection();
     checkSafety();
