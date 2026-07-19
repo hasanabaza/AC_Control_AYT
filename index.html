@@ -548,7 +548,12 @@ function startAppListeners() {
   onValue(histQuery, (snap) => {
     const val = snap.val() || {};
     historyPoints = Object.entries(val)
-      .map(([k, v]) => ({ t: Number(v.timestamp || k), temp: v.temp, acOn: !!v.acOn }))
+      .map(([k, v]) => ({
+        t: Number(v.timestamp || k),
+        temp: typeof v.temp === 'number' ? v.temp : Number(v.temp),
+        setTemp: (v && (typeof v.setTemp === 'number' ? v.setTemp : (v.setTemp ? Number(v.setTemp) : NaN))),
+        acOn: !!v.acOn
+      }))
       .filter(p => Number.isFinite(p.t) && typeof p.temp === 'number')
       .sort((a,b) => a.t - b.t);
     const cutoff = Date.now() - 24*60*60*1000;
@@ -802,9 +807,9 @@ function renderChart() {
   if (!ctx || typeof Chart === 'undefined') {
     return;
   }
-
   const labels = historyPoints.map(p => new Date(p.t));
   const data = historyPoints.map(p => p.temp);
+  const setData = historyPoints.map(p => Number.isFinite(p.setTemp) ? p.setTemp : null);
 
   const acOnShading = {
     id: 'acOnShading',
@@ -835,15 +840,29 @@ function renderChart() {
     type: 'line',
     data: {
       labels,
-      datasets: [{
-        data,
-        borderColor: '#F2A65A',
-        backgroundColor: 'rgba(242,166,90,0.08)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 0,
-        borderWidth: 2
-      }]
+      datasets: [
+        {
+          data,
+          borderColor: '#F2A65A',
+          backgroundColor: 'rgba(242,166,90,0.08)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0,
+          borderWidth: 2,
+          label: 'Room temp (°C)'
+        },
+        {
+          data: setData,
+          borderColor: '#4FD1C5',
+          backgroundColor: 'rgba(79,209,197,0.06)',
+          fill: false,
+          tension: 0.1,
+          pointRadius: 0,
+          borderWidth: 2,
+          borderDash: [6,4],
+          label: 'Set temp (°C)'
+        }
+      ]
     },
     options: {
       responsive: true,
