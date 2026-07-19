@@ -665,9 +665,11 @@ function renderHero() {
   if (manualDraft && typeof manualDraft.temp === 'number') setTemp = manualDraft.temp.toFixed(0);
   else if (latestStatus && typeof latestStatus.temp === 'number') setTemp = latestStatus.temp.toFixed(0);
 
-  const power = (latestStatus && typeof latestStatus.power === 'string')
-    ? latestStatus.power
-    : (manualDraft && typeof manualDraft.power === 'string' ? manualDraft.power : 'unknown');
+  const statusPower = latestStatus && typeof latestStatus.power === 'string' ? latestStatus.power : null;
+  const commandPower = manualDraft && typeof manualDraft.power === 'string' ? manualDraft.power : null;
+  const power = (statusPower === 'off' || commandPower === 'off') ? 'off'
+    : (statusPower === 'on' || commandPower === 'on') ? 'on'
+    : 'unknown';
   const on = power === 'on';
   const modeLabel = on ? (autoEnabled ? 'Auto' : 'Manual') : 'Off';
 
@@ -675,7 +677,7 @@ function renderHero() {
     stateEl.textContent = `${modeLabel} · ${setTemp}°C`;
     stateEl.classList.add('on');
   } else if (power === 'off') {
-    stateEl.textContent = `${modeLabel} · --°C`;
+    stateEl.textContent = 'Off · --°C';
     stateEl.classList.remove('on');
   } else {
     stateEl.textContent = 'Unknown';
