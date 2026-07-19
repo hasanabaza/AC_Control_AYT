@@ -301,10 +301,7 @@
       <span class="status-dot"></span><span id="statusText" data-i18n="statusChecking">Checking…</span>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
-      <select id="languageSelect" class="pill-select" aria-label="Language">
-        <option value="en">English</option>
-        <option value="tr">Türkçe</option>
-      </select>
+      <button class="icon-btn" id="languageToggle" aria-label="Switch language">🇹🇷</button>
       <button class="icon-btn" id="settingsBtn" data-i18n-title="settingsButtonTitle" title="Settings">⚙</button>
       <button class="icon-btn" id="logoutBtn" data-i18n-title="logoutButtonTitle" title="Sign out">⏻</button>
     </div>
@@ -594,6 +591,19 @@ function t(key, vars = {}) {
   const value = (translations[currentLang] && translations[currentLang][key]) || translations.en[key] || key;
   return Object.entries(vars).reduce((text, [name, val]) => text.replaceAll(`{{${name}}}`, val), value);
 }
+function setLanguageToggleText() {
+  const btn = document.getElementById('languageToggle');
+  if (!btn) return;
+  if (currentLang === 'en') {
+    btn.textContent = '🇹🇷';
+    btn.title = 'Switch to Turkish';
+    btn.setAttribute('aria-label', 'Switch to Turkish');
+  } else {
+    btn.textContent = '🇬🇧';
+    btn.title = 'Switch to English';
+    btn.setAttribute('aria-label', 'Switch to English');
+  }
+}
 function translatePage(lang) {
   currentLang = lang;
   localStorage.setItem('preferredLang', lang);
@@ -612,15 +622,14 @@ function translatePage(lang) {
     if (!key) return;
     el.title = t(key);
   });
-  document.getElementById('languageSelect').value = lang;
+  setLanguageToggleText();
   renderScheduleState();
   renderConnection();
 }
 function initLanguage() {
-  const select = document.getElementById('languageSelect');
-  if (select) {
-    select.value = currentLang;
-    select.addEventListener('change', () => translatePage(select.value));
+  const toggle = document.getElementById('languageToggle');
+  if (toggle) {
+    toggle.addEventListener('click', () => translatePage(currentLang === 'en' ? 'tr' : 'en'));
   }
   translatePage(currentLang);
 }
