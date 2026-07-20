@@ -1,0 +1,45 @@
+/* Design tokens, reset and base typography.
+   Everything colour/spacing related lives here so themes stay in one file. */
+
+:root{
+  --bg:#0A1120;
+  --bg-grad-top:#0D1730;
+  --surface:#121A2E;
+  --surface-2:#1B2540;
+  --border:#263353;
+  --text:#E7ECF7;
+  --text-muted:#8B96B3;
+  --cool:#4FD1C5;
+  --cool-dim:#1E4A47;
+  --warm:#F2A65A;
+  --warm-dim:#4A3A20;
+  --danger:#F26D6D;
+  --danger-dim:#4A2226;
+  --radius:18px;
+  --radius-sm:12px;
+  font-size:16px;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+
+body{
+  background:radial-gradient(1200px 600px at 50% -10%, var(--bg-grad-top), var(--bg) 60%);
+  color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:48px;
+}
+
+h1,h2,h3{font-family:'Sora',sans-serif;margin:0;letter-spacing:-0.01em;}
+a{color:var(--cool);}
+button{font-family:inherit;}
+
+.mono{font-family:'JetBrains Mono',monospace;}
+
+button, .icon-btn, .switch{touch-action:manipulation;}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important;}
+}

@@ -1,0 +1,157 @@
+/* Page-level layout: login screen, app shell, and the individual cards. */
+
+/* ---------- Login ---------- */
+#loginScreen{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:36px;}
+.brand-mark{
+  width:38px;height:38px;border-radius:11px;
+  background:linear-gradient(160deg,var(--cool),#2f9e93);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 24px rgba(79,209,197,0.35);
+}
+.brand-mark svg{width:20px;height:20px;}
+.brand-name{font-size:1.05rem;font-weight:700;}
+.brand-sub{font-size:0.75rem;color:var(--text-muted);margin-top:-2px;}
+
+.login-card{
+  width:100%;max-width:360px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:28px 24px;
+}
+.login-card h1{font-size:1.3rem;margin-bottom:6px;}
+.login-card p.sub{color:var(--text-muted);font-size:0.85rem;margin:0 0 22px;}
+.remember-row{
+  display:flex;align-items:center;gap:8px;margin:4px 0;
+  font-size:0.82rem;color:var(--text-muted);
+}
+
+/* ---------- App shell ---------- */
+#appScreen{display:none;max-width:480px;margin:0 auto;padding:18px 16px 0;}
+header.appbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 2px 18px;
+}
+.appbar-actions{display:flex;gap:8px;align-items:center;}
+
+/* ---------- Safety banner ---------- */
+#safetyBanner{
+  display:none;
+  background:linear-gradient(135deg,var(--danger-dim),var(--surface));
+  border:1px solid var(--danger);
+  color:#FFD9D9;
+  border-radius:var(--radius);
+  padding:14px 16px;margin-bottom:16px;
+  font-size:0.85rem;line-height:1.4;
+}
+#safetyBanner b{display:block;font-size:0.9rem;margin-bottom:2px;color:#fff;}
+
+/* ---------- Hero ---------- */
+.hero{display:flex;align-items:flex-end;justify-content:space-between;}
+.hero-temp{font-size:3.4rem;font-weight:700;line-height:1;}
+.hero-temp span{font-size:1.4rem;font-weight:500;color:var(--text-muted);}
+.hero-meta{text-align:right;}
+.hero-state{font-weight:600;font-size:0.95rem;}
+.hero-state.on{color:var(--cool);}
+.hero-updated{font-size:0.72rem;color:var(--text-muted);margin-top:4px;}
+
+/* ---------- Night arc ---------- */
+.arc-wrap{position:relative;height:96px;border-radius:14px;overflow:hidden;margin-top:4px;}
+.arc-wrap svg{display:block;width:100%;height:100%;}
+.arc-labels{
+  display:flex;justify-content:space-between;font-size:0.65rem;
+  color:var(--text-muted);margin-top:6px;font-family:'JetBrains Mono',monospace;
+}
+
+/* ---------- Auto / manual switch ---------- */
+.mode-switch{
+  display:flex;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:99px;padding:4px;margin-top:16px;
+}
+.mode-switch button{
+  flex:1;border:none;background:transparent;color:var(--text-muted);
+  padding:9px 0;border-radius:99px;font-weight:600;font-size:0.82rem;cursor:pointer;
+}
+.mode-switch button.active{background:var(--cool);color:#06231F;}
+
+/* ---------- Schedule rows ---------- */
+.sched-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 0;border-top:1px solid var(--border);
+}
+.sched-row:first-of-type{border-top:none;}
+.sched-row.disabled{opacity:0.4;}
+.sched-toggle{flex:0 0 auto;}
+.sched-toggle input{width:18px;height:18px;accent-color:var(--cool);}
+.sched-times{display:flex;align-items:center;gap:6px;flex:1;}
+.sched-times input[type=time]{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);padding:7px 6px;font-family:'JetBrains Mono',monospace;
+  font-size:0.82rem;width:98px;
+}
+.sched-arrow{color:var(--text-muted);font-size:0.8rem;}
+.sched-temp{
+  display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;
+  font-size:0.85rem;flex:0 0 auto;
+}
+
+.schedule-status{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:16px 0 6px;font-size:0.85rem;
+}
+.save-row{display:flex;justify-content:flex-end;margin-top:14px;}
+
+/* ---------- Manual controls ---------- */
+.manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.manual-grid .full{grid-column:1/-1;}
+.manual-grid.disabled{opacity:0.4;pointer-events:none;}
+.ctrl-label{font-size:0.72rem;color:var(--text-muted);margin-bottom:6px;}
+.ctrl-label.inline{margin:0;}
+.power-row{display:flex;align-items:center;justify-content:space-between;}
+.manual-note{font-size:0.72rem;color:var(--text-muted);margin-top:10px;}
+
+/* ---------- History ---------- */
+canvas#historyChart{max-height:220px;touch-action:manipulation;}
+.history-details{margin-top:12px;color:var(--text-muted);font-size:0.88rem;line-height:1.5;}
+
+/* ---------- Settings ---------- */
+.settings-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.settings-grid{display:grid;gap:14px;}
+.settings-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;background:var(--surface-2);
+  border:1px solid var(--border);border-radius:16px;
+}
+.settings-row label{
+  display:flex;align-items:center;gap:12px;font-size:0.95rem;
+  color:var(--text);cursor:pointer;
+}
+.settings-row input[type=checkbox]{accent-color:var(--cool);width:18px;height:18px;}
+.settings-group{
+  display:flex;flex-direction:column;gap:8px;padding:14px 16px;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:16px;
+}
+.settings-group label{font-size:0.82rem;color:var(--text-muted);margin:0;}
+.settings-control-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.settings-group input[type=number]{
+  width:100%;max-width:120px;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:10px 12px;color:var(--text);font-size:0.95rem;
+}
+.about-list{display:flex;flex-direction:column;gap:6px;}
+.about-list dt{font-weight:700;margin:0;}
+.about-list dd{margin:0;}
+.about-copyright{font-size:0.85rem;color:var(--text-muted);}
+
+/* ---------- Footer ---------- */
+.footer-note{
+  text-align:center;color:var(--text-muted);font-size:0.7rem;
+  margin-top:20px;padding-bottom:20px;
+}

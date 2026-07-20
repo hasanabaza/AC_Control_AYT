@@ -14,255 +14,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-<!-- Chart.js -->
+<!-- Styles: tokens -> reusable components -> page layout -->
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/layout.css">
+
+<!-- Chart.js plus its moment time-scale adapter (order matters) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-
-<style>
-  :root{
-    --bg:#0A1120;
-    --bg-grad-top:#0D1730;
-    --surface:#121A2E;
-    --surface-2:#1B2540;
-    --border:#263353;
-    --text:#E7ECF7;
-    --text-muted:#8B96B3;
-    --cool:#4FD1C5;
-    --cool-dim:#1E4A47;
-    --warm:#F2A65A;
-    --warm-dim:#4A3A20;
-    --danger:#F26D6D;
-    --danger-dim:#4A2226;
-    --radius:18px;
-    --radius-sm:12px;
-    font-size:16px;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:radial-gradient(1200px 600px at 50% -10%, var(--bg-grad-top), var(--bg) 60%);
-    color:var(--text);
-    font-family:'Inter',system-ui,sans-serif;
-    min-height:100vh;
-    -webkit-font-smoothing:antialiased;
-    padding-bottom:48px;
-  }
-  h1,h2,h3{font-family:'Sora',sans-serif;margin:0;letter-spacing:-0.01em;}
-  .mono{font-family:'JetBrains Mono',monospace;}
-  button{font-family:inherit;}
-  a{color:var(--cool);}
-
-  /* ---------- Login ---------- */
-  #loginScreen{
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding:24px;
-  }
-  .brand{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:36px;
-  }
-  .brand-mark{
-    width:38px;height:38px;border-radius:11px;
-    background:linear-gradient(160deg,var(--cool),#2f9e93);
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 0 24px rgba(79,209,197,0.35);
-  }
-  .brand-mark svg{width:20px;height:20px;}
-  .brand-name{font-size:1.05rem;font-weight:700;}
-  .brand-sub{font-size:0.75rem;color:var(--text-muted);margin-top:-2px;}
-
-  .login-card{
-    width:100%;max-width:360px;
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:28px 24px;
-  }
-  .login-card h1{font-size:1.3rem;margin-bottom:6px;}
-  .login-card p.sub{color:var(--text-muted);font-size:0.85rem;margin:0 0 22px;}
-  .field{margin-bottom:14px;}
-  .field label{display:block;font-size:0.78rem;color:var(--text-muted);margin-bottom:6px;}
-  .field input{
-    width:100%;
-    background:var(--surface-2);
-    border:1px solid var(--border);
-    border-radius:var(--radius-sm);
-    padding:12px 14px;
-    color:var(--text);
-    font-size:0.95rem;
-    outline:none;
-  }
-  .field input:focus{border-color:var(--cool);}
-  .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:8px;
-    border:none;border-radius:var(--radius-sm);
-    padding:13px 18px;
-    font-weight:600;font-size:0.92rem;
-    cursor:pointer;
-    transition:transform .08s ease, opacity .15s ease;
-  }
-  .btn:active{transform:scale(0.97);}
-  .btn:focus-visible{outline:2px solid var(--cool);outline-offset:2px;}
-  .btn-primary{background:var(--cool);color:#06231F;width:100%;margin-top:6px;}
-  .btn-primary[disabled]{opacity:0.55;cursor:not-allowed;}
-  .btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border);}
-  .error-text{color:var(--danger);font-size:0.82rem;margin-top:10px;min-height:1.2em;}
-  .remember-row{display:flex;align-items:center;gap:8px;margin:4px 0 4px;font-size:0.82rem;color:var(--text-muted);}
-
-  /* ---------- App shell ---------- */
-  #appScreen{display:none;max-width:480px;margin:0 auto;padding:18px 16px 0;}
-  header.appbar{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:6px 2px 18px;
-  }
-  .status-pill{
-    display:inline-flex;align-items:center;gap:6px;
-    font-size:0.72rem;font-weight:600;
-    padding:5px 10px;border-radius:99px;
-    background:var(--surface-2);border:1px solid var(--border);color:var(--text-muted);
-  }
-  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--text-muted);}
-  .status-pill.online .status-dot{background:var(--cool);box-shadow:0 0 8px var(--cool);}
-  .status-pill.online{color:var(--cool);}
-  .status-pill.offline .status-dot{background:var(--danger);}
-  .status-pill.offline{color:var(--danger);}
-  .icon-btn{
-    background:var(--surface-2);border:1px solid var(--border);
-    width:34px;height:34px;border-radius:10px;color:var(--text-muted);
-    display:flex;align-items:center;justify-content:center;cursor:pointer;
-  }
-
-  /* Safety banner */
-  #safetyBanner{
-    display:none;
-    background:linear-gradient(135deg,var(--danger-dim),var(--surface));
-    border:1px solid var(--danger);
-    color:#FFD9D9;
-    border-radius:var(--radius);
-    padding:14px 16px;margin-bottom:16px;
-    font-size:0.85rem;line-height:1.4;
-  }
-  #safetyBanner b{display:block;font-size:0.9rem;margin-bottom:2px;color:#fff;}
-
-  .card{
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:20px;
-    margin-bottom:16px;
-  }
-  .card h2{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:600;margin-bottom:14px;}
-
-  /* Hero */
-  .hero{
-    display:flex;align-items:flex-end;justify-content:space-between;
-  }
-  .hero-temp{font-size:3.4rem;font-weight:700;line-height:1;}
-  .hero-temp span{font-size:1.4rem;font-weight:500;color:var(--text-muted);}
-  .hero-meta{text-align:right;}
-  .hero-state{font-weight:600;font-size:0.95rem;}
-  .hero-state.on{color:var(--cool);}
-  .hero-updated{font-size:0.72rem;color:var(--text-muted);margin-top:4px;}
-
-  /* Night Arc */
-  .arc-wrap{position:relative;height:96px;border-radius:14px;overflow:hidden;margin-top:4px;}
-  .arc-wrap svg{display:block;width:100%;height:100%;}
-  .arc-labels{display:flex;justify-content:space-between;font-size:0.65rem;color:var(--text-muted);margin-top:6px;font-family:'JetBrains Mono',monospace;}
-
-  /* Auto/manual switch */
-  .mode-switch{display:flex;background:var(--surface-2);border:1px solid var(--border);border-radius:99px;padding:4px;margin-top:16px;}
-  .mode-switch button{
-    flex:1;border:none;background:transparent;color:var(--text-muted);
-    padding:9px 0;border-radius:99px;font-weight:600;font-size:0.82rem;cursor:pointer;
-  }
-  .mode-switch button.active{background:var(--cool);color:#06231F;}
-
-  /* Schedule rows */
-  .sched-row{
-    display:flex;align-items:center;gap:10px;
-    padding:10px 0;border-top:1px solid var(--border);
-  }
-  .sched-row:first-of-type{border-top:none;}
-  .sched-row.disabled{opacity:0.4;}
-  .sched-toggle{flex:0 0 auto;}
-  .sched-toggle input{width:18px;height:18px;accent-color:var(--cool);}
-  .sched-times{display:flex;align-items:center;gap:6px;flex:1;}
-  .sched-times input[type=time]{
-    background:var(--surface-2);border:1px solid var(--border);border-radius:8px;
-    color:var(--text);padding:7px 6px;font-family:'JetBrains Mono',monospace;font-size:0.82rem;width:98px;
-  }
-  .sched-arrow{color:var(--text-muted);font-size:0.8rem;}
-  .sched-temp{display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;flex:0 0 auto;}
-  .stepper{display:flex;align-items:center;gap:6px;}
-  .stepper button{
-    width:26px;height:26px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);
-    color:var(--text);font-size:0.95rem;cursor:pointer;
-  }
-
-  /* Manual controls */
-  .manual-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .manual-grid .full{grid-column:1/-1;}
-  .ctrl-label{font-size:0.72rem;color:var(--text-muted);margin-bottom:6px;}
-  .power-row{display:flex;align-items:center;justify-content:space-between;}
-  .switch{position:relative;width:48px;height:28px;border-radius:99px;background:var(--surface-2);border:1px solid var(--border);cursor:pointer;}
-  .switch::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:var(--text-muted);transition:transform .15s ease, background .15s ease;}
-  .switch.on{background:var(--cool-dim);border-color:var(--cool);}
-  .switch.on::after{transform:translateX(20px);background:var(--cool);}
-  .temp-stepper{display:flex;align-items:center;justify-content:center;gap:16px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 0;}
-  .temp-stepper button{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:1.2rem;cursor:pointer;}
-  .temp-stepper .val{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:600;min-width:56px;text-align:center;}
-  select.pill-select{
-    width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);
-    border-radius:var(--radius-sm);padding:11px 10px;font-size:0.88rem;font-family:inherit;
-  }
-  .manual-grid.disabled{opacity:0.4;pointer-events:none;}
-  .manual-note{font-size:0.72rem;color:var(--text-muted);margin-top:10px;}
-
-  .save-row{display:flex;justify-content:flex-end;margin-top:14px;}
-  .btn-save{background:var(--surface-2);border:1px solid var(--cool);color:var(--cool);padding:9px 16px;font-size:0.82rem;border-radius:99px;}
-  .btn-save:active{transform:scale(0.97);}
-  .save-flash{color:var(--cool);font-size:0.75rem;align-self:center;margin-right:10px;opacity:0;transition:opacity .2s ease;}
-  .save-flash.show{opacity:1;}
-
-  .schedule-status{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 6px;font-size:0.85rem;}
-  .status-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid transparent;font-weight:600;}
-  .status-badge.saved{color:var(--cool);border-color:var(--cool);background:rgba(79,209,197,0.1);}
-  .status-badge.unsaved{color:#F2A65A;border-color:#F2A65A;background:rgba(242,166,90,0.15);}
-  .status-badge.saving{color:var(--text);border-color:var(--text-muted);background:rgba(255,255,255,0.05);}
-  .status-note{color:var(--text-muted);font-size:0.82rem;}
-
-  .settings-grid{display:grid;gap:14px;}
-  .settings-row{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:14px 16px;background:var(--surface-2);
-    border:1px solid var(--border);border-radius:16px;
-  }
-  .settings-row label{display:flex;align-items:center;gap:12px;font-size:0.95rem;color:var(--text);cursor:pointer;}
-  .settings-row input[type=checkbox]{accent-color:var(--cool);width:18px;height:18px;}
-  .settings-group{display:flex;flex-direction:column;gap:8px;padding:14px 16px;background:var(--surface-2);border:1px solid var(--border);border-radius:16px;}
-  .settings-group label{font-size:0.82rem;color:var(--text-muted);margin:0;}
-  .settings-control-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-  .settings-group input[type=number]{width:100%;max-width:120px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 12px;color:var(--text);font-size:0.95rem;}
-
-  .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--cool);margin-right:6px;box-shadow:0 0 8px var(--cool);animation:pulse 1.6s infinite;}
-  @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.2);opacity:0.7;}}
-  .live-tag{display:inline-flex;align-items:center;font-size:0.72rem;color:var(--cool);margin-top:6px;}
-
-  canvas#historyChart{max-height:220px;touch-action: manipulation;}
-
-  button, .icon-btn, .switch{touch-action: manipulation;}
-
-  .footer-note{text-align:center;color:var(--text-muted);font-size:0.7rem;margin-top:20px;padding-bottom:20px;}
-
-  @media (prefers-reduced-motion:reduce){
-    *{transition:none !important;animation:none !important;}
-  }
-</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
 </head>
 <body>
 
@@ -283,11 +43,11 @@
     <p class="sub" data-i18n="signInSub">Use the shared account to control the AC from anywhere.</p>
     <div class="field">
       <label for="email" data-i18n="emailLabel">Email</label>
-      <input id="email" type="email" autocomplete="username" placeholder="you@example.com" data-i18n-placeholder="emailPlaceholder">
+      <input id="email" type="email" autocomplete="username" data-i18n-placeholder="emailPlaceholder">
     </div>
     <div class="field">
       <label for="password" data-i18n="passwordLabel">Password</label>
-      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" data-i18n-placeholder="passwordPlaceholder">
+      <input id="password" type="password" autocomplete="current-password" data-i18n-placeholder="passwordPlaceholder">
     </div>
     <button class="btn btn-primary" id="loginBtn" data-i18n="signInButton">Sign in</button>
     <div class="error-text" id="loginError"></div>
@@ -300,7 +60,7 @@
     <div class="status-pill offline" id="statusPill">
       <span class="status-dot"></span><span id="statusText" data-i18n="statusChecking">Checking…</span>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;">
+    <div class="appbar-actions">
       <button class="icon-btn" id="languageToggle" aria-label="Switch language">🇹🇷</button>
       <button class="icon-btn" id="settingsBtn" data-i18n-title="settingsButtonTitle" title="Settings">⚙</button>
       <button class="icon-btn" id="logoutBtn" data-i18n-title="logoutButtonTitle" title="Sign out">⏻</button>
@@ -308,98 +68,101 @@
   </header>
 
   <div id="mainView">
-  <div id="safetyBanner">
-    <b>⚠ Room is warm and the AC isn't responding</b>
-    <span id="safetyBannerText"></span>
-  </div>
-
-  <!-- Hero -->
-  <div class="card">
-    <div class="hero">
-      <div class="hero-temp mono"><span id="currentTemp">--</span><span>°C</span></div>
-      <div class="hero-meta">
-        <div class="hero-state" id="acStateLabel">Unknown</div>
-        <div class="hero-updated" id="lastUpdated" data-i18n="waitingForDevice">Waiting for device…</div>
-        <div class="live-tag" id="liveTag" style="display:none;"><span class="live-dot"></span><span data-i18n="liveUpdate">Live update</span></div>
-      </div>
+    <div id="safetyBanner">
+      <b data-i18n="safetyBannerTitle">⚠ Room is warm and the AC isn't responding</b>
+      <span id="safetyBannerText"></span>
     </div>
 
-    <div class="arc-wrap" id="arcWrap">
-      <svg id="nightArc" viewBox="0 0 300 96" preserveAspectRatio="none"></svg>
-    </div>
-    <div class="arc-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
-
-    <div class="mode-switch">
-      <button id="modeAutoBtn">Auto</button>
-      <button id="modeManualBtn">Manual</button>
-    </div>
-  </div>
-
-  <!-- Schedule -->
-  <div class="card">
-    <h2 data-i18n="nightSchedule">Night schedule</h2>
-    <div id="scheduleRows"></div>
-    <div class="schedule-status">
-      <span id="scheduleSaveState" class="status-badge saved" data-i18n="scheduleSaved">Schedule saved</span>
-      <span id="scheduleStatusNote" class="status-note" data-i18n="scheduleSyncedNote">Your schedule is synced with Firebase.</span>
-    </div>
-    <div class="save-row">
-      <span class="save-flash" id="schedSaveFlash" data-i18n="savedFlash">Saved</span>
-      <button class="btn btn-save" id="saveScheduleBtn" data-i18n="saveScheduleButton">Save schedule</button>
-    </div>
-  </div>
-
-  <!-- Manual controls -->
-  <div class="card">
-    <h2 data-i18n="manualControl">Manual control</h2>
-    <div class="manual-grid" id="manualGrid">
-      <div class="full power-row">
-        <span class="ctrl-label" style="margin:0;" data-i18n="powerLabel">Power</span>
-        <div class="switch" id="powerSwitch"></div>
-      </div>
-      <div class="full">
-        <div class="ctrl-label" data-i18n="targetTempLabel">Target temperature</div>
-        <div class="temp-stepper">
-          <button id="tempDown" aria-label="Decrease temperature">–</button>
-          <div class="val mono" id="tempVal">24°</div>
-          <button id="tempUp" aria-label="Increase temperature">+</button>
+    <!-- Hero: current temperature, AC state, 24h arc, auto/manual -->
+    <div class="card">
+      <div class="hero">
+        <div class="hero-temp mono"><span id="currentTemp">--</span><span>°C</span></div>
+        <div class="hero-meta">
+          <div class="hero-state" id="acStateLabel" data-i18n="stateUnknown">Unknown</div>
+          <div class="hero-updated" id="lastUpdated" data-i18n="waitingForDevice">Waiting for device…</div>
+          <div class="live-tag" id="liveTag" style="display:none;">
+            <span class="live-dot"></span><span id="liveTagText"></span>
+          </div>
         </div>
       </div>
-      <div>
-        <div class="ctrl-label" data-i18n="modeLabel">Mode</div>
-        <select class="pill-select" id="modeSelect">
-          <option value="cool" data-i18n="modeCool">Cool</option>
-          <option value="fan" data-i18n="modeFan">Fan</option>
-          <option value="dry" data-i18n="modeDry">Dry</option>
-          <option value="auto" data-i18n="modeAuto">Auto</option>
-        </select>
+
+      <div class="arc-wrap" id="arcWrap">
+        <svg id="nightArc" viewBox="0 0 300 96" preserveAspectRatio="none"></svg>
       </div>
-      <div>
-        <div class="ctrl-label" data-i18n="fanSpeedLabel">Fan speed</div>
-        <select class="pill-select" id="fanSelect">
-          <option value="auto" data-i18n="fanAuto">Auto</option>
-          <option value="low" data-i18n="fanLow">Low</option>
-          <option value="med" data-i18n="fanMedium">Medium</option>
-          <option value="high" data-i18n="fanHigh">High</option>
-        </select>
+      <div class="arc-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+
+      <div class="mode-switch">
+        <button id="modeAutoBtn" data-i18n="modeAutoButton">Auto</button>
+        <button id="modeManualBtn" data-i18n="modeManualButton">Manual</button>
       </div>
     </div>
-    <div class="manual-note" id="manualNote" data-i18n="manualNote">Auto mode is on — switch to Manual to control the AC directly.</div>
+
+    <!-- Schedule (rows are generated by ScheduleView) -->
+    <div class="card">
+      <h2 data-i18n="nightSchedule">Night schedule</h2>
+      <div id="scheduleRows"></div>
+      <div class="schedule-status">
+        <span id="scheduleSaveState" class="status-badge saved" data-i18n="scheduleSaved">Schedule saved</span>
+        <span id="scheduleStatusNote" class="status-note" data-i18n="scheduleSyncedNote">Your schedule is synced with Firebase.</span>
+      </div>
+      <div class="save-row">
+        <span class="save-flash" id="schedSaveFlash" data-i18n="savedFlash">Saved</span>
+        <button class="btn btn-save" id="saveScheduleBtn" data-i18n="saveScheduleButton">Save schedule</button>
+      </div>
+    </div>
+
+    <!-- Manual controls -->
+    <div class="card">
+      <h2 data-i18n="manualControl">Manual control</h2>
+      <div class="manual-grid" id="manualGrid">
+        <div class="full power-row">
+          <span class="ctrl-label inline" data-i18n="powerLabel">Power</span>
+          <div class="switch" id="powerSwitch" role="switch" aria-label="AC power"></div>
+        </div>
+        <div class="full">
+          <div class="ctrl-label" data-i18n="targetTempLabel">Target temperature</div>
+          <div class="temp-stepper">
+            <button id="tempDown" aria-label="Decrease temperature">–</button>
+            <div class="val mono" id="tempVal">24°</div>
+            <button id="tempUp" aria-label="Increase temperature">+</button>
+          </div>
+        </div>
+        <div>
+          <div class="ctrl-label" data-i18n="modeLabel">Mode</div>
+          <select class="pill-select" id="modeSelect" aria-label="Mode">
+            <option value="cool" data-i18n="modeCool">Cool</option>
+            <option value="fan" data-i18n="modeFan">Fan</option>
+            <option value="dry" data-i18n="modeDry">Dry</option>
+            <option value="auto" data-i18n="modeAuto">Auto</option>
+          </select>
+        </div>
+        <div>
+          <div class="ctrl-label" data-i18n="fanSpeedLabel">Fan speed</div>
+          <select class="pill-select" id="fanSelect" aria-label="Fan speed">
+            <option value="auto" data-i18n="fanAuto">Auto</option>
+            <option value="low" data-i18n="fanLow">Low</option>
+            <option value="med" data-i18n="fanMedium">Medium</option>
+            <option value="high" data-i18n="fanHigh">High</option>
+          </select>
+        </div>
+      </div>
+      <div class="manual-note" id="manualNote" data-i18n="manualNote">Auto mode is on — switch to Manual to control the AC directly.</div>
+    </div>
+
+    <!-- History -->
+    <div class="card">
+      <h2 data-i18n="historyTitle">Last 24 hours</h2>
+      <canvas id="historyChart"></canvas>
+      <div id="historyDetails" class="history-details" data-i18n="historyDetailHint">Tap a chart point to view room/set temperature details.</div>
+    </div>
+
+    <div class="footer-note" data-i18n="footerNote">Night Cool · connected via Firebase</div>
   </div>
 
-  <!-- History -->
-  <div class="card">
-    <h2 data-i18n="historyTitle">Last 24 hours</h2>
-    <canvas id="historyChart"></canvas>
-    <div id="historyDetails" style="margin-top:12px;color:var(--text-muted);font-size:0.88rem;line-height:1.5;" data-i18n="historyDetailHint">Tap a chart point to view room/set temperature details.</div>
-  </div>
-
-  <div class="footer-note">Night Cool · connected via Firebase</div>
-  </div>
-
+  <!-- ===================== SETTINGS ===================== -->
   <div id="settingsView" style="display:none;">
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div class="settings-header">
         <h2 data-i18n="settingsTitle">Settings</h2>
         <button class="btn btn-save" id="closeSettingsBtn" data-i18n="backButton">Back</button>
       </div>
@@ -432,13 +195,13 @@
           </div>
         </div>
         <div class="settings-group">
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <span style="font-weight:700;">Author</span>
-            <span>Hasan Abaza</span>
-            <span style="font-weight:700;">Version</span>
-            <span>1.0.0</span>
-            <span style="font-size:0.85rem;color:var(--text-muted);">© 2026</span>
-          </div>
+          <dl class="about-list">
+            <dt data-i18n="authorLabel">Author</dt>
+            <dd>Hasan Abaza</dd>
+            <dt data-i18n="versionLabel">Version</dt>
+            <dd>1.0.0</dd>
+            <dd class="about-copyright">© 2026</dd>
+          </dl>
         </div>
       </div>
     </div>
@@ -446,846 +209,6 @@
 
 </div>
 
-<!-- ===================== FIREBASE ===================== -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut,
-  setPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getDatabase, ref, onValue, set, get, query, limitToLast
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-// ---------------------------------------------------------------
-// TODO: replace with your Firebase project's web config
-// (Firebase console → Project settings → Your apps → SDK setup)
-// ---------------------------------------------------------------
-const firebaseConfig = {
-  apiKey: "AIzaSyCZSpKfPC0K9KVnf5BnfJBHfGtaAHWDIWI",
-  authDomain: "ac-control-ayt.firebaseapp.com",
-  databaseURL: "https://ac-control-ayt-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "ac-control-ayt",
-  storageBucket: "ac-control-ayt.firebasestorage.app",
-  messagingSenderId: "11363048858",
-  appId: "1:11363048858:web:9d42ac960e407f4fe2ae23"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-const translations = {
-  en: {
-    signInTitle: 'Sign in',
-    signInSub: 'Use the shared account to control the AC from anywhere.',
-    emailLabel: 'Email',
-    emailPlaceholder: 'you@example.com',
-    passwordLabel: 'Password',
-    passwordPlaceholder: '••••••••',
-    signInButton: 'Sign in',
-    statusChecking: 'Checking…',
-    settingsButtonTitle: 'Settings',
-    logoutButtonTitle: 'Sign out',
-    waitingForDevice: 'Waiting for device…',
-    liveUpdate: 'Live update',
-    nightSchedule: 'Night schedule',
-    scheduleSaved: 'Schedule saved',
-    scheduleSyncedNote: 'Your schedule is synced with Firebase.',
-    savedFlash: 'Saved',
-    saveScheduleButton: 'Save schedule',
-    manualControl: 'Manual control',
-    powerLabel: 'Power',
-    targetTempLabel: 'Target temperature',
-    modeLabel: 'Mode',
-    modeCool: 'Cool',
-    modeFan: 'Fan',
-    modeDry: 'Dry',
-    modeAuto: 'Auto',
-    fanSpeedLabel: 'Fan speed',
-    fanAuto: 'Auto',
-    fanLow: 'Low',
-    fanMedium: 'Medium',
-    fanHigh: 'High',
-    manualNote: 'Auto mode is on — switch to Manual to control the AC directly.',
-    historyTitle: 'Last 24 hours',
-    historyDetailHint: 'Tap a chart point to view room/set temperature details.',
-    settingsTitle: 'Settings',
-    backButton: 'Back',
-    debugFirebase: 'Enable Firebase debug (console)',
-    debugEmitter: 'Enable IR emitter debug',
-    debugReceiver: 'Enable IR receiver debug',
-    calibrationOffsetLabel: 'DS18B20 calibration offset (°C)',
-    saveOffsetButton: 'Save offset',
-    hysteresisLabel: 'Controller hysteresis (°C)',
-    minToggleLabel: 'Min toggle interval (s)',
-    saveConfigButton: 'Save controller config',
-    unsavedChanges: 'Unsaved changes',
-    scheduleUnsavedNote: 'Remember to press Save schedule to sync your changes.',
-    statusOnline: 'Online',
-    statusOffline: 'Offline',
-    statusOfflineSince: 'Offline since {{since}}',
-    firebaseConfigError: 'Firebase config is not ready. Update the web config and redeploy the site.',
-    sessionPersistenceNote: 'Using session persistence — sign-in will not persist after closing the browser.',
-    inMemoryPersistenceNote: 'Using temporary in-memory auth (private browsing). You may need to sign in again.',
-    signingIn: 'Signing in…',
-    signInError: 'Could not sign in. Check the email and password.',
-    updatedPrefix: 'Updated {{time}}',
-    safetyBanner: 'Room is at {{temp}}°C and Auto mode is on, but the device hasn\'t checked in {{since}}. Check the AC in person if possible.',
-    roomTempLabel: 'Room temp',
-    setTempLabel: 'Set temp'
-  },
-  tr: {
-    signInTitle: 'Giriş yap',
-    signInSub: 'Klimayı her yerden kontrol etmek için ortak hesabı kullanın.',
-    emailLabel: 'E-posta',
-    emailPlaceholder: 'ornek@ornek.com',
-    passwordLabel: 'Parola',
-    passwordPlaceholder: '••••••••',
-    signInButton: 'Giriş yap',
-    statusChecking: 'Kontrol ediliyor…',
-    settingsButtonTitle: 'Ayarlar',
-    logoutButtonTitle: 'Çıkış yap',
-    waitingForDevice: 'Cihazdan haber bekleniyor…',
-    liveUpdate: 'Son Güncelleme',
-    nightSchedule: 'Klima Programı',
-    scheduleSaved: 'Program Güncel',
-    scheduleSyncedNote: 'Program senkronize edildi.',
-    savedFlash: 'Kaydedildi',
-    saveScheduleButton: 'Kaydet',
-    manualControl: 'Manuel kontrol',
-    powerLabel: 'Aç / Kapat',
-    targetTempLabel: 'Hedef sıcaklık',
-    modeLabel: 'Mod',
-    modeCool: 'Soğut',
-    modeFan: 'Fan',
-    modeDry: 'Dry',
-    modeAuto: 'Otomatik',
-    fanSpeedLabel: 'Fan hızı',
-    fanAuto: 'Otomatik',
-    fanLow: 'Düşük',
-    fanMedium: 'Orta',
-    fanHigh: 'Yüksek',
-    manualNote: 'Otomatik mod açık — Klimayı doğrudan kontrol etmek için Manuel\'e geçin.',
-    historyTitle: 'Son 24 saat',
-    historyDetailHint: 'Oda/hedef sıcaklık detayları için grafiğe dokunun.',
-    settingsTitle: 'Ayarlar',
-    backButton: 'Geri',
-    debugFirebase: 'Firebase hata ayıklamasını etkinleştir',
-    debugEmitter: 'Kumanda verici hata ayıklamasını etkinleştir',
-    debugReceiver: 'Kumandaalıcı hata ayıklamasını etkinleştir',
-    calibrationOffsetLabel: 'Sıcaklık Sensörü kalibrasyon (°C)',
-    saveOffsetButton: 'Kalibrasyonu kaydet',
-    hysteresisLabel: 'Tolerans aç/kapat (°C)',
-    minToggleLabel: 'Aç/kapat arası minimum geçmesi gereken süre (s)',
-    saveConfigButton: 'Ayarları kaydet',
-    unsavedChanges: 'Kaydedilmemiş değişiklikler var!',
-    scheduleUnsavedNote: 'Değişiklikleri kaydetmek için Kaydet\'e basmayı unutmayın.',
-    statusOnline: 'Bağlandı',
-    statusOffline: 'Çevrimdışı',
-    statusOfflineSince: '{{since}}\'den beri bağlantı yok',
-    firebaseConfigError: 'Firebase yapılandırması hazır değil. web config\'i güncelleyin ve siteyi yeniden dağıtın.',
-    sessionPersistenceNote: 'Oturum kalıcılığı kullanılıyor — tarayıcı kapatıldığında giriş kalıcı olmayacaktır.',
-    inMemoryPersistenceNote: 'Geçici bellek içi kimlik doğrulama kullanılıyor (gizli mod). Yeniden giriş yapmanız gerekebilir.',
-    signingIn: 'Giriş yapılıyor…',
-    signInError: 'Giriş yapılamadı. E-posta ve parolayı kontrol edin.',
-    safetyBanner: '{{temp}}°C ve Otomatik mod açık, ancak cihaz {{since}} beri kontrol etmedi. Mümkünse Klimayı şahsen kontrol edin.',
-    roomTempLabel: 'Oda sıcaklığı',
-    setTempLabel: 'Ayarlanan sıcaklık'
-  }
-};
-
-let currentLang = localStorage.getItem('preferredLang') || 'en';
-// Track whether schedule changes are unsaved. Declared early so
-// translatePage() can reference it during initLanguage().
-let scheduleDirty = false;
-// Heartbeat timestamp (ms) and stale threshold used by renderConnection/checkSafety.
-// Declared early so initLanguage() -> translatePage() -> renderConnection() can access them.
-let latestHeartbeat = 0;
-const HEARTBEAT_STALE_MS = 90 * 1000;
-function t(key, vars = {}) {
-  const value = (translations[currentLang] && translations[currentLang][key]) || translations.en[key] || key;
-  return Object.entries(vars).reduce((text, [name, val]) => text.replaceAll(`{{${name}}}`, val), value);
-}
-function setLanguageToggleText() {
-  const btn = document.getElementById('languageToggle');
-  if (!btn) return;
-  if (currentLang === 'en') {
-    btn.textContent = '🇹🇷';
-    btn.title = 'Switch to Turkish';
-    btn.setAttribute('aria-label', 'Switch to Turkish');
-  } else {
-    btn.textContent = '🇬🇧';
-    btn.title = 'Switch to English';
-    btn.setAttribute('aria-label', 'Switch to English');
-  }
-}
-function translatePage(lang) {
-  currentLang = lang;
-  localStorage.setItem('preferredLang', lang);
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
-    if (!key) return;
-    el.textContent = t(key);
-  });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    const key = el.dataset.i18nPlaceholder;
-    if (!key) return;
-    el.placeholder = t(key);
-  });
-  document.querySelectorAll('[data-i18n-title]').forEach(el => {
-    const key = el.dataset.i18nTitle;
-    if (!key) return;
-    el.title = t(key);
-  });
-  setLanguageToggleText();
-  renderScheduleState();
-  renderConnection();
-}
-function initLanguage() {
-  const toggle = document.getElementById('languageToggle');
-  if (toggle) {
-    toggle.addEventListener('click', () => translatePage(currentLang === 'en' ? 'tr' : 'en'));
-  }
-  translatePage(currentLang);
-}
-
-// Debug helpers: log effective config and origin to help browsers like Opera
-console.log('Firebase config (debug):', firebaseConfig);
-console.log('location.origin:', location.origin);
-console.log('authDomain:', firebaseConfig.authDomain);
-
-// ---------------- Auth ----------------
-const loginScreen = document.getElementById('loginScreen');
-const appScreen = document.getElementById('appScreen');
-const loginBtn = document.getElementById('loginBtn');
-const loginError = document.getElementById('loginError');
-
-initLanguage();
-
-const configHasPlaceholders = Object.values(firebaseConfig).some(v => typeof v === 'string' && v.includes('REPLACE_ME'));
-if (configHasPlaceholders) {
-  console.error('Firebase config still contains placeholder values. Update index.html and redeploy to GitHub Pages.');
-  loginError.textContent = t('firebaseConfigError');
-  loginBtn.disabled = true;
-}
-
-// Ensure persistence works across browsers; fall back for iOS/private mode.
-async function ensurePersistence() {
-  try {
-    await setPersistence(auth, browserLocalPersistence);
-    console.log('Auth persistence: local');
-  } catch (e1) {
-    console.warn('Local persistence failed, trying session persistence', e1);
-    try {
-      await setPersistence(auth, browserSessionPersistence);
-      console.log('Auth persistence: session');
-      document.getElementById('loginError').textContent = t('sessionPersistenceNote');
-    } catch (e2) {
-      console.warn('Session persistence failed, using in-memory persistence', e2);
-      await setPersistence(auth, inMemoryPersistence);
-      console.log('Auth persistence: in-memory');
-      document.getElementById('loginError').textContent = t('inMemoryPersistenceNote');
-    }
-  }
-}
-ensurePersistence();
-
-loginBtn.addEventListener('click', async () => {
-  loginError.textContent = '';
-  loginBtn.disabled = true;
-  loginBtn.textContent = t('signingIn');
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (err) {
-    console.error(err);
-    loginError.textContent = err?.message || t('signInError');
-  } finally {
-    loginBtn.disabled = false;
-    loginBtn.textContent = t('signInButton');
-  }
-});
-
-document.getElementById('password').addEventListener('keydown', (e)=>{
-  if (e.key === 'Enter') loginBtn.click();
-});
-
-document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    loginScreen.style.display = 'none';
-    appScreen.style.display = 'block';
-    startAppListeners();
-  } else {
-    loginScreen.style.display = 'flex';
-    appScreen.style.display = 'none';
-  }
-});
-
-// ---------------- App state ----------------
-let latestSensor = null;      // {temp, timestamp}
-let latestStatus = null;      // last-known AC state (from device)
-let autoEnabled = true;
-let lastLiveUpdateAt = 0;
-let schedule = [
-  {enabled:true,  start:"22:00", end:"07:00", targetTemp:26},
-  {enabled:false, start:"13:00", end:"15:00", targetTemp:26}
-];
-let manualDraft = {power:"off", temp:24, mode:"cool", fan:"auto"};
-let historyPoints = []; // [{t, temp, acOn}]
-let listenersStarted = false;
-const SAFETY_TEMP_C = 32;
-
-function startAppListeners() {
-  if (listenersStarted) return;
-  listenersStarted = true;
-
-  onValue(ref(db, 'ac/sensor'), (snap) => {
-    latestSensor = snap.val();
-    lastLiveUpdateAt = Date.now();
-    renderHero();
-    checkSafety();
-  });
-
-  onValue(ref(db, 'ac/status'), (snap) => {
-    latestStatus = snap.val();
-    lastLiveUpdateAt = Date.now();
-    renderHero();
-    checkSafety();
-  });
-
-  onValue(ref(db, 'ac/heartbeat'), (snap) => {
-    // Device may write heartbeat in seconds (ESP code uses seconds). Convert
-    // to milliseconds for Date comparisons if needed.
-    let hb = snap.val() || 0;
-    if (hb && typeof hb === 'number' && hb < 1e12) hb = hb * 1000; // seconds -> ms
-    latestHeartbeat = hb;
-    lastLiveUpdateAt = Date.now();
-    renderConnection();
-    checkSafety();
-  });
-  setInterval(renderConnection, 15000);
-  setInterval(checkSafety, 15000);
-
-  onValue(ref(db, 'ac/auto'), (snap) => {
-    const v = snap.val();
-    autoEnabled = v && typeof v.enabled === 'boolean' ? v.enabled : true;
-    renderModeSwitch();
-    renderHero();
-    checkSafety();
-  });
-
-  onValue(ref(db, 'ac/schedule'), (snap) => {
-    const v = snap.val();
-    if (Array.isArray(v) && v.length) {
-      schedule = [0,1].map(i => v[i] || schedule[i]);
-      scheduleDirty = false;
-      renderSchedule();
-      renderScheduleState();
-      drawNightArc();
-    }
-  });
-
-  onValue(ref(db, 'ac/command'), (snap) => {
-    const v = snap.val();
-    if (v) {
-      manualDraft = {
-        power: v.power || manualDraft.power,
-        temp: typeof v.temp === 'number' ? v.temp : manualDraft.temp,
-        mode: v.mode || manualDraft.mode,
-        fan: v.fan || manualDraft.fan
-      };
-      renderManual();
-    }
-  });
-
-  const histQuery = query(ref(db, 'ac/history'), limitToLast(300));
-  onValue(histQuery, (snap) => {
-    const val = snap.val() || {};
-    historyPoints = Object.entries(val)
-      .map(([k, v]) => ({
-        t: Number(v.timestamp || k),
-        temp: typeof v.temp === 'number' ? v.temp : Number(v.temp),
-        setTemp: (v && (typeof v.setTemp === 'number' ? v.setTemp : (v.setTemp ? Number(v.setTemp) : NaN))),
-        acOn: !!v.acOn
-      }))
-      .filter(p => Number.isFinite(p.t) && typeof p.temp === 'number')
-      .sort((a,b) => a.t - b.t);
-    const cutoff = Date.now() - 24*60*60*1000;
-    historyPoints = historyPoints.filter(p => p.t >= cutoff);
-    renderChart();
-    drawNightArc();
-  });
-
-  renderSchedule();
-  renderScheduleState();
-  drawNightArc();
-  setInterval(drawNightArc, 60000);
-
-  // Debug toggles: reflect /ac/debug values and allow toggling
-  const debugFirebaseEl = document.getElementById('debugFirebase');
-  const debugEmitterEl = document.getElementById('debugEmitter');
-  const debugReceiverEl = document.getElementById('debugReceiver');
-  const calibrationOffsetEl = document.getElementById('calibrationOffset');
-  const saveCalibrationBtn = document.getElementById('saveCalibrationBtn');
-
-  onValue(ref(db, 'ac/debug'), (snap) => {
-    const v = snap.val() || {};
-    debugFirebaseEl.checked = !!v.firebase;
-    debugEmitterEl.checked = !!v.irEmitter;
-    debugReceiverEl.checked = !!v.irReceiver;
-  });
-
-  onValue(ref(db, 'ac/calibration'), (snap) => {
-    const v = snap.val() || {};
-    const offset = typeof v.offset === 'number' ? v.offset : Number(v.offset || 0);
-    if (!Number.isNaN(offset)) {
-      calibrationOffsetEl.value = offset.toFixed(1);
-    }
-  });
-
-  // Controller config (hysteresis in °C, min toggle interval in ms)
-  onValue(ref(db, 'ac/config'), (snap) => {
-    const v = snap.val() || {};
-    const h = typeof v.hysteresis === 'number' ? v.hysteresis : Number(v.hysteresis || 0.5);
-    const m = typeof v.minToggleMs === 'number' ? v.minToggleMs : Number(v.minToggleMs || 120000);
-    document.getElementById('hysteresisInput').value = (Number.isFinite(h) ? h : 0.5).toFixed(1);
-    document.getElementById('minToggleSec').value = Math.round((Number.isFinite(m) ? m : 120000) / 1000);
-  });
-
-  debugFirebaseEl.addEventListener('change', (e) => set(ref(db, 'ac/debug/firebase'), !!e.target.checked));
-  debugEmitterEl.addEventListener('change', (e) => set(ref(db, 'ac/debug/irEmitter'), !!e.target.checked));
-  debugReceiverEl.addEventListener('change', (e) => set(ref(db, 'ac/debug/irReceiver'), !!e.target.checked));
-  saveCalibrationBtn.addEventListener('click', () => {
-    const offset = Number(calibrationOffsetEl.value) || 0;
-    set(ref(db, 'ac/calibration/offset'), offset);
-  });
-  document.getElementById('saveConfigBtn').addEventListener('click', () => {
-    const h = Number(document.getElementById('hysteresisInput').value) || 0.5;
-    const sec = Number(document.getElementById('minToggleSec').value) || 120;
-    const ms = Math.max(0, Math.round(sec*1000));
-    set(ref(db, 'ac/config/hysteresis'), h);
-    set(ref(db, 'ac/config/minToggleMs'), ms);
-  });
-}
-
-// ---------------- Rendering: hero + connection ----------------
-function renderHero() {
-  const tempEl = document.getElementById('currentTemp');
-  const stateEl = document.getElementById('acStateLabel');
-  const updatedEl = document.getElementById('lastUpdated');
-  const liveTag = document.getElementById('liveTag');
-
-  if (latestSensor && typeof latestSensor.temp === 'number') {
-    tempEl.textContent = latestSensor.temp.toFixed(1);
-  } else {
-    tempEl.textContent = '--';
-  }
-
-  // Determine the current set temperature: prefer explicit command (manualDraft),
-  // then status.temp if device provides it, else unknown.
-  let setTemp = '--';
-  if (manualDraft && typeof manualDraft.temp === 'number') setTemp = manualDraft.temp.toFixed(0);
-  else if (latestStatus && typeof latestStatus.temp === 'number') setTemp = latestStatus.temp.toFixed(0);
-
-  const statusPower = latestStatus && typeof latestStatus.power === 'string' ? latestStatus.power : null;
-  const commandPower = manualDraft && typeof manualDraft.power === 'string' ? manualDraft.power : null;
-  const power = (statusPower === 'off' || commandPower === 'off') ? 'off'
-    : (statusPower === 'on' || commandPower === 'on') ? 'on'
-    : 'unknown';
-  const on = power === 'on';
-  const modeLabel = on ? (autoEnabled ? 'Auto' : 'Manual') : 'Off';
-
-  if (on) {
-    stateEl.textContent = `${modeLabel} · ${setTemp}°C`;
-    stateEl.classList.add('on');
-  } else if (power === 'off') {
-    stateEl.textContent = 'Off · --°C';
-    stateEl.classList.remove('on');
-  } else {
-    stateEl.textContent = 'Unknown';
-    stateEl.classList.remove('on');
-  }
-
-  const ts = (latestSensor && latestSensor.timestamp) || 0;
-  updatedEl.textContent = ts ? `${t('updatedPrefix', { time: timeAgo(ts) })}` : t('waitingForDevice');
-
-  if (lastLiveUpdateAt) {
-    liveTag.style.display = 'inline-flex';
-    liveTag.textContent = `Live update · ${new Date(lastLiveUpdateAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`;
-  } else {
-    liveTag.style.display = 'none';
-  }
-}
-
-function renderConnection() {
-  const pill = document.getElementById('statusPill');
-  const text = document.getElementById('statusText');
-  const stale = !latestHeartbeat || (Date.now() - latestHeartbeat) > HEARTBEAT_STALE_MS;
-  pill.classList.toggle('online', !stale);
-  pill.classList.toggle('offline', stale);
-  text.textContent = stale
-    ? (latestHeartbeat ? t('statusOfflineSince', { since: formatTime(latestHeartbeat) }) : t('statusOffline'))
-    : t('statusOnline');
-}
-
-function checkSafety() {
-  const banner = document.getElementById('safetyBanner');
-  const bannerText = document.getElementById('safetyBannerText');
-  const stale = !latestHeartbeat || (Date.now() - latestHeartbeat) > HEARTBEAT_STALE_MS;
-  const hot = latestSensor && typeof latestSensor.temp === 'number' && latestSensor.temp > SAFETY_TEMP_C;
-  const show = autoEnabled && hot && stale;
-  banner.style.display = show ? 'block' : 'none';
-  if (show) {
-    bannerText.textContent = t('safetyBanner', {
-      temp: latestSensor.temp.toFixed(1),
-      since: latestHeartbeat ? formatTime(latestHeartbeat) : t('waitingForDevice')
-    });
-  }
-}
-
-function timeAgo(ts) {
-  const s = Math.max(0, Math.round((Date.now() - ts) / 1000));
-  if (s < 60) return `${s}s ago`;
-  if (s < 3600) return `${Math.round(s/60)}m ago`;
-  return `${Math.round(s/3600)}h ago`;
-}
-function formatTime(ts) {
-  const d = new Date(ts);
-  return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-}
-function timeToMinutes(hhmm) {
-  const [h,m] = hhmm.split(':').map(Number);
-  return h*60+m;
-}
-
-// ---------------- Mode switch ----------------
-const modeAutoBtn = document.getElementById('modeAutoBtn');
-const modeManualBtn = document.getElementById('modeManualBtn');
-function renderModeSwitch() {
-  modeAutoBtn.classList.toggle('active', autoEnabled);
-  modeManualBtn.classList.toggle('active', !autoEnabled);
-  document.getElementById('manualGrid').classList.toggle('disabled', autoEnabled);
-  document.getElementById('manualNote').style.display = autoEnabled ? 'block' : 'none';
-}
-modeAutoBtn.addEventListener('click', () => set(ref(db,'ac/auto'), {enabled:true}));
-modeManualBtn.addEventListener('click', () => set(ref(db,'ac/auto'), {enabled:false}));
-
-// ---------------- Night Arc (signature visual) ----------------
-function drawNightArc() {
-  const svg = document.getElementById('nightArc');
-  const W = 300, H = 96;
-  let parts = [];
-
-  // Day/night gradient background, tied to real 24h axis
-  parts.push(`
-    <defs>
-      <linearGradient id="dayNight" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%"  stop-color="#0A1120"/>
-        <stop offset="25%" stop-color="#16233F"/>
-        <stop offset="50%" stop-color="#2C3F63"/>
-        <stop offset="75%" stop-color="#16233F"/>
-        <stop offset="100%" stop-color="#0A1120"/>
-      </linearGradient>
-    </defs>
-    <rect x="0" y="0" width="${W}" height="${H}" fill="url(#dayNight)"/>
-  `);
-
-  // hour gridlines
-  for (let h=0; h<=24; h+=3) {
-    const x = (h/24)*W;
-    parts.push(`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#263353" stroke-width="1" opacity="0.5"/>`);
-  }
-
-  // scheduled cool blocks (teal bands), handles overnight wrap (end < start)
-  schedule.forEach(b => {
-    if (!b.enabled) return;
-    const s = timeToMinutes(b.start), e = timeToMinutes(b.end);
-    const bandY = 8, bandH = 34;
-    if (e > s) {
-      parts.push(band(s,e));
-    } else {
-      parts.push(band(s,1440));
-      parts.push(band(0,e));
-    }
-    function band(from,to){
-      const x1=(from/1440)*W, x2=(to/1440)*W;
-      return `<rect x="${x1}" y="${bandY}" width="${Math.max(2,x2-x1)}" height="${bandH}" rx="4" fill="var(--cool)" opacity="0.55"/>`;
-    }
-  });
-
-  // actual recorded temperature line + AC-on glow from history (last 24h mapped onto 0-1440 "today" axis by time-of-day)
-  if (historyPoints.length > 1) {
-    const temps = historyPoints.map(p=>p.temp);
-    const minT = Math.min(...temps), maxT = Math.max(...temps);
-    const range = Math.max(1, maxT-minT);
-    const lineY = 66, lineH = 22;
-    let path = '';
-    historyPoints.forEach((p,i) => {
-      const d = new Date(p.t);
-      const minutesOfDay = d.getHours()*60 + d.getMinutes();
-      const x = (minutesOfDay/1440)*W;
-      const y = lineY + lineH - ((p.temp-minT)/range)*lineH;
-      path += (i===0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
-    });
-    parts.push(`<path d="${path}" fill="none" stroke="var(--warm)" stroke-width="2" opacity="0.85"/>`);
-  }
-
-  // current time marker
-  const now = new Date();
-  const nowX = ((now.getHours()*60+now.getMinutes())/1440)*W;
-  parts.push(`<line x1="${nowX}" y1="0" x2="${nowX}" y2="${H}" stroke="#E7ECF7" stroke-width="1.5"/>`);
-  parts.push(`<circle cx="${nowX}" cy="4" r="3" fill="#E7ECF7"/>`);
-
-  svg.innerHTML = parts.join('');
-}
-
-// ---------------- Schedule editor ----------------
-const scheduleRowsEl = document.getElementById('scheduleRows');
-function renderSchedule() {
-  scheduleRowsEl.innerHTML = '';
-  schedule.forEach((block, i) => {
-    const row = document.createElement('div');
-    row.className = 'sched-row' + (block.enabled ? '' : ' disabled');
-    row.innerHTML = `
-      <div class="sched-toggle"><input type="checkbox" data-i="${i}" class="schedEnable" ${block.enabled?'checked':''}></div>
-      <div class="sched-times">
-        <input type="time" class="schedStart" data-i="${i}" value="${block.start}">
-        <span class="sched-arrow">→</span>
-        <input type="time" class="schedEnd" data-i="${i}" value="${block.end}">
-      </div>
-      <div class="sched-temp">
-        <div class="stepper">
-          <button class="schedTempDown" data-i="${i}">–</button>
-          <span>${block.targetTemp}°</span>
-          <button class="schedTempUp" data-i="${i}">+</button>
-        </div>
-      </div>
-    `;
-    scheduleRowsEl.appendChild(row);
-  });
-
-  scheduleRowsEl.querySelectorAll('.schedEnable').forEach(el => el.addEventListener('change', e => {
-    schedule[+e.target.dataset.i].enabled = e.target.checked;
-    markScheduleDirty();
-    renderSchedule(); drawNightArc();
-  }));
-  scheduleRowsEl.querySelectorAll('.schedStart').forEach(el => el.addEventListener('change', e => {
-    schedule[+e.target.dataset.i].start = e.target.value;
-    markScheduleDirty();
-    drawNightArc();
-  }));
-  scheduleRowsEl.querySelectorAll('.schedEnd').forEach(el => el.addEventListener('change', e => {
-    schedule[+e.target.dataset.i].end = e.target.value;
-    markScheduleDirty();
-    drawNightArc();
-  }));
-  scheduleRowsEl.querySelectorAll('.schedTempUp').forEach(el => el.addEventListener('click', e => {
-    const i=+e.target.dataset.i; schedule[i].targetTemp = Math.min(30, schedule[i].targetTemp+1);
-    markScheduleDirty();
-    renderSchedule();
-  }));
-  scheduleRowsEl.querySelectorAll('.schedTempDown').forEach(el => el.addEventListener('click', e => {
-    const i=+e.target.dataset.i; schedule[i].targetTemp = Math.max(16, schedule[i].targetTemp-1);
-    markScheduleDirty();
-    renderSchedule();
-  }));
-}
-
-function markScheduleDirty() {
-  scheduleDirty = true;
-  renderScheduleState();
-}
-function clearScheduleDirty() {
-  scheduleDirty = false;
-  renderScheduleState();
-}
-function renderScheduleState() {
-  const badge = document.getElementById('scheduleSaveState');
-  const note = document.getElementById('scheduleStatusNote');
-  if (!badge || !note) return;
-  if (scheduleDirty) {
-    badge.textContent = t('unsavedChanges');
-    badge.className = 'status-badge unsaved';
-    note.textContent = t('scheduleUnsavedNote');
-  } else {
-    badge.textContent = t('scheduleSaved');
-    badge.className = 'status-badge saved';
-    note.textContent = t('scheduleSyncedNote');
-  }
-}
-
-document.getElementById('saveScheduleBtn').addEventListener('click', async () => {
-  await set(ref(db,'ac/schedule'), schedule);
-  clearScheduleDirty();
-  const flash = document.getElementById('schedSaveFlash');
-  flash.classList.add('show');
-  setTimeout(()=>flash.classList.remove('show'), 1600);
-});
-
-// ---------------- Manual controls ----------------
-function renderManual() {
-  document.getElementById('powerSwitch').classList.toggle('on', manualDraft.power === 'on');
-  document.getElementById('tempVal').textContent = `${manualDraft.temp}°`;
-  document.getElementById('modeSelect').value = manualDraft.mode;
-  document.getElementById('fanSelect').value = manualDraft.fan;
-}
-function sendCommand(partial) {
-  manualDraft = {...manualDraft, ...partial};
-  renderManual();
-  set(ref(db,'ac/command'), {...manualDraft, timestamp: Date.now()});
-}
-document.getElementById('powerSwitch').addEventListener('click', () => {
-  sendCommand({power: manualDraft.power === 'on' ? 'off' : 'on'});
-});
-document.getElementById('tempUp').addEventListener('click', () => {
-  sendCommand({temp: Math.min(30, manualDraft.temp+1)});
-});
-document.getElementById('tempDown').addEventListener('click', () => {
-  sendCommand({temp: Math.max(16, manualDraft.temp-1)});
-});
-document.getElementById('modeSelect').addEventListener('change', e => sendCommand({mode: e.target.value}));
-document.getElementById('fanSelect').addEventListener('change', e => sendCommand({fan: e.target.value}));
-  document.getElementById('settingsBtn').addEventListener('click', () => {
-    document.getElementById('mainView').style.display = 'none';
-    document.getElementById('settingsView').style.display = 'block';
-  });
-  document.getElementById('closeSettingsBtn').addEventListener('click', () => {
-    document.getElementById('mainView').style.display = 'block';
-    document.getElementById('settingsView').style.display = 'none';
-  });
-renderManual();
-
-// ---------------- Chart ----------------
-let chart;
-function renderChart() {
-  const ctx = document.getElementById('historyChart');
-  if (!ctx || typeof Chart === 'undefined') {
-    return;
-  }
-  const labels = historyPoints.map(p => new Date(p.t));
-  const data = historyPoints.map(p => p.temp);
-  const setData = historyPoints.map(p => Number.isFinite(p.setTemp) ? p.setTemp : null);
-
-  const acOnShading = {
-    id: 'acOnShading',
-    beforeDatasetsDraw(c) {
-      const {ctx, chartArea, scales} = c;
-      if (!chartArea) return;
-      ctx.save();
-      ctx.fillStyle = 'rgba(79,209,197,0.12)';
-      let runStart = null;
-      historyPoints.forEach((p, i) => {
-        if (p.acOn && runStart === null) runStart = i;
-        const ending = (!p.acOn || i === historyPoints.length-1) && runStart !== null;
-        if (ending) {
-          const endIdx = p.acOn ? i : i-1;
-          if (endIdx >= runStart) {
-            const x1 = scales.x.getPixelForValue(labels[runStart]);
-            const x2 = scales.x.getPixelForValue(labels[endIdx]);
-            ctx.fillRect(x1, chartArea.top, Math.max(1,x2-x1), chartArea.bottom-chartArea.top);
-          }
-          runStart = null;
-        }
-      });
-      ctx.restore();
-    }
-  };
-
-  const cfg = {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          data,
-          borderColor: '#F2A65A',
-          backgroundColor: 'rgba(242,166,90,0.08)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          pointHitRadius: 8,
-          borderWidth: 2,
-          label: 'Room temp (°C)'
-        },
-        {
-          data: setData,
-          borderColor: '#4FD1C5',
-          backgroundColor: 'rgba(79,209,197,0.06)',
-          fill: false,
-          tension: 0.1,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          pointHitRadius: 8,
-          borderWidth: 2,
-          borderDash: [6,4],
-          label: 'Set temp (°C)'
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      animation: false,
-      plugins: { legend: {display:false} },
-      interaction: {
-        mode: 'nearest',
-        intersect: true
-      },
-      onClick(evt, activeEls, chart) {
-        if (!activeEls.length) return;
-        const idx = activeEls[0].index;
-        renderHistoryDetails(historyPoints[idx]);
-      },
-      scales: {
-        x: {
-          type: 'time',
-          time: { unit: 'hour' },
-          ticks: { color: '#8B96B3', font:{family:"'JetBrains Mono', monospace", size:10} },
-          grid: { color: '#263353' }
-        },
-        y: {
-          ticks: { color: '#8B96B3', font:{family:"'JetBrains Mono', monospace", size:10} },
-          grid: { color: '#263353' }
-        }
-      }
-    },
-    plugins: [acOnShading]
-  };
-
-  if (chart) { chart.data = cfg.data; chart.update(); }
-  else { chart = new Chart(ctx, cfg); }
-  if (historyPoints.length) {
-    renderHistoryDetails(historyPoints[historyPoints.length - 1]);
-  }
-}
-
-function renderHistoryDetails(point) {
-  const detailsEl = document.getElementById('historyDetails');
-  if (!detailsEl || !point) return;
-  const time = new Date(point.t);
-  const room = typeof point.temp === 'number' ? point.temp.toFixed(1) : '--';
-  const setTemp = Number.isFinite(point.setTemp) ? point.setTemp.toFixed(1) : '--';
-  detailsEl.innerHTML = `
-    <strong>${time.toLocaleString([], {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'})}</strong><br>
-    ${t('roomTempLabel')}: <strong>${room}°C</strong><br>
-    ${t('setTempLabel')}: <strong>${setTemp === '--' ? '--' : setTemp + '°C'}</strong>`;
-}
-</script>
-
-<!-- Optional chart time adapter -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js').catch(()=>{});
-    });
-  }
-</script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>

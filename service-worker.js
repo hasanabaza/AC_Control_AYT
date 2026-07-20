@@ -3,12 +3,40 @@
 // phone briefly has no signal. It does NOT cache Firebase data - live control
 // always needs a live connection.
 
-const CACHE_NAME = 'night-cool-shell-v1';
+// Bump CACHE_NAME whenever SHELL_FILES changes so old caches are evicted.
+const CACHE_NAME = 'night-cool-shell-v2';
 const SHELL_FILES = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './css/tokens.css',
+  './css/components.css',
+  './css/layout.css',
+  './js/main.js',
+  './js/config.js',
+  './js/i18n/I18n.js',
+  './js/i18n/translations.js',
+  './js/data/AcRepository.js',
+  './js/state/AppState.js',
+  './js/utils/time.js',
+  './js/views/AuthView.js',
+  './js/views/HeroView.js',
+  './js/views/ConnectionView.js',
+  './js/views/SafetyBannerView.js',
+  './js/views/NightArcView.js',
+  './js/views/ModeSwitchView.js',
+  './js/views/ScheduleView.js',
+  './js/views/ManualControlView.js',
+  './js/views/HistoryChartView.js',
+  './js/views/SettingsView.js'
 ];
+
+// Path suffixes used to recognise shell requests. './' is excluded because
+// stripping it leaves an empty string, which endsWith() matches against every
+// URL — that made the "everything else" branch below unreachable.
+const SHELL_SUFFIXES = SHELL_FILES
+  .map((file) => file.replace('./', ''))
+  .filter(Boolean);
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -36,7 +64,10 @@ self.addEventListener('fetch', (event) => {
 
   // App shell files: use network-first for index.html/root so clients pick up
   // new deploys quickly (avoids stale cached HTML in some browsers).
-  if (SHELL_FILES.some((f) => url.pathname.endsWith(f.replace('./', '')))) {
+  const isShellRequest =
+    url.pathname.endsWith('/') || SHELL_SUFFIXES.some((suffix) => url.pathname.endsWith(suffix));
+
+  if (isShellRequest) {
     event.respondWith(
       fetch(event.request)
         .then((res) => {
