@@ -1,5 +1,8 @@
 import { TEMP_MIN_C, TEMP_MAX_C } from '../config.js';
 import { clamp } from '../utils/time.js';
+import { log } from '../logging/log.js';
+
+const logger = log.child('Manual');
 
 /**
  * Power / target temperature / mode / fan controls.
@@ -42,8 +45,9 @@ export class ManualControlView {
   #send(patch) {
     const command = { ...this.#state.command, ...patch };
     this.#state.setCommand(command);
+    logger.debug(`sending ${JSON.stringify(patch)}`);
     this.#repo.sendCommand(command).catch((error) =>
-      console.error('[Manual] command write failed', error));
+      logger.error('command write failed', error));
   }
 
   render() {

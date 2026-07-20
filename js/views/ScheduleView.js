@@ -1,5 +1,8 @@
 import { TEMP_MIN_C, TEMP_MAX_C } from '../config.js';
 import { clamp } from '../utils/time.js';
+import { log } from '../logging/log.js';
+
+const logger = log.child('Schedule');
 
 /**
  * Two-row night schedule editor.
@@ -126,11 +129,12 @@ export class ScheduleView {
     try {
       await this.#repo.saveSchedule(this.#state.schedule);
       this.#state.markScheduleSaved();
+      logger.info('schedule saved');
       flash.classList.add('show');
       setTimeout(() => flash.classList.remove('show'), 1600);
     } catch (error) {
       // Leave the dirty badge up so the user knows the change didn't land.
-      console.error('[Schedule] save failed', error);
+      logger.error('save failed', error);
     } finally {
       saveBtn.disabled = false;
     }

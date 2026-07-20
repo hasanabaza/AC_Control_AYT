@@ -3,6 +3,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-aut
 import { getDatabase } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 import { firebaseConfig } from './config.js';
+import { log } from './logging/log.js';
 import { translations } from './i18n/translations.js';
 import { I18n } from './i18n/I18n.js';
 import { AcRepository } from './data/AcRepository.js';
@@ -18,6 +19,8 @@ import { ScheduleView } from './views/ScheduleView.js';
 import { ManualControlView } from './views/ManualControlView.js';
 import { HistoryChartView } from './views/HistoryChartView.js';
 import { SettingsView } from './views/SettingsView.js';
+
+const logger = log.child('App');
 
 /**
  * Composition root: builds every collaborator, wires the repository's database
@@ -57,7 +60,7 @@ class NightCoolApp {
     this.#renderAll();
 
     if (this.#hasPlaceholderConfig()) {
-      console.error('Firebase config still contains placeholder values.');
+      logger.error('Firebase config still contains placeholder values');
       this.#views.auth.disableWithConfigError();
       return;
     }
@@ -102,6 +105,7 @@ class NightCoolApp {
   #startListeners() {
     if (this.#listenersStarted) return;
     this.#listenersStarted = true;
+    logger.info('attaching database listeners');
 
     const state = this.#state;
     this.#repo.onSensor((sensor) => state.setSensor(sensor));
@@ -125,6 +129,8 @@ new NightCoolApp().start();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => logger.debug('service worker registered'))
+      .catch((error) => logger.warn('service worker registration failed', error));
   });
 }

@@ -3,6 +3,10 @@ import {
   setPersistence, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+import { log } from '../logging/log.js';
+
+const logger = log.child('Auth');
+
 /**
  * Sign-in form, sign-out button, and the login/app screen swap.
  *
@@ -64,11 +68,11 @@ export class AuthView {
     for (const [persistence, label, noteKey] of strategies) {
       try {
         await setPersistence(this.#auth, persistence);
-        console.log(`Auth persistence: ${label}`);
+        logger.info(`persistence: ${label}`);
         if (noteKey) this.#els.error.textContent = this.#i18n.t(noteKey);
         return;
       } catch (error) {
-        console.warn(`Auth persistence "${label}" unavailable`, error);
+        logger.warn(`persistence "${label}" unavailable, trying next`, error);
       }
     }
   }
@@ -81,8 +85,10 @@ export class AuthView {
 
     try {
       await signInWithEmailAndPassword(this.#auth, email.value.trim(), password.value);
+      logger.info('signed in');
     } catch (err) {
-      console.error(err);
+      // The user-facing message stays generic; the real cause goes to the log.
+      logger.error(`sign-in failed: ${err?.code ?? 'unknown'}`, err);
       error.textContent = this.#i18n.t('signInError');
     } finally {
       loginBtn.disabled = false;
