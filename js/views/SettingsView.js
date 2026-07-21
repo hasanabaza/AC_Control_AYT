@@ -15,6 +15,8 @@ export class SettingsView {
       settingsView: document.getElementById('settingsView'),
       openBtn: document.getElementById('settingsBtn'),
       closeBtn: document.getElementById('closeSettingsBtn'),
+      deviceName: document.getElementById('deviceNameInput'),
+      saveDeviceNameBtn: document.getElementById('saveDeviceNameBtn'),
       debugFirebase: document.getElementById('debugFirebase'),
       debugEmitter: document.getElementById('debugEmitter'),
       debugReceiver: document.getElementById('debugReceiver'),
@@ -27,6 +29,11 @@ export class SettingsView {
 
     this.#els.openBtn.addEventListener('click', () => this.open());
     this.#els.closeBtn.addEventListener('click', () => this.close());
+
+    this.#els.saveDeviceNameBtn.addEventListener('click', () => {
+      const name = this.#els.deviceName.value.trim();
+      if (name) this.#repo.setDeviceName(name);
+    });
 
     this.#els.debugFirebase.addEventListener('change', (e) =>
       this.#repo.setDebugFlag('firebase', e.target.checked));
@@ -51,23 +58,36 @@ export class SettingsView {
     this.#els.settingsView.style.display = 'none';
   }
 
-  /** Subscribe to the settings-related database paths. */
+  /**
+   * Subscribe to the active device's settings paths. Returns the list of
+   * unsubscribe functions so the composition root can detach them when the
+   * selected device changes.
+   */
   bind() {
-    this.#repo.onDebugFlags((flags) => {
-      this.#els.debugFirebase.checked = flags.firebase;
-      this.#els.debugEmitter.checked = flags.irEmitter;
-      this.#els.debugReceiver.checked = flags.irReceiver;
-    });
+    return [
+      this.#repo.onDeviceName((name) => {
+        // Don't clobber a name the user is mid-edit; only sync when unfocused.
+        if (document.activeElement !== this.#els.deviceName) {
+          this.#els.deviceName.value = name;
+        }
+      }),
 
-    this.#repo.onCalibrationOffset((offset) => {
-      this.#els.calibrationOffset.value = offset.toFixed(1);
-    });
+      this.#repo.onDebugFlags((flags) => {
+        this.#els.debugFirebase.checked = flags.firebase;
+        this.#els.debugEmitter.checked = flags.irEmitter;
+        this.#els.debugReceiver.checked = flags.irReceiver;
+      }),
 
-    this.#repo.onControllerConfig(({ hysteresis, minToggleMs }) => {
-      this.#els.hysteresis.value = hysteresis.toFixed(1);
-      // Stored in milliseconds, edited in whole seconds.
-      this.#els.minToggleSec.value = Math.round(minToggleMs / 1000);
-    });
+      this.#repo.onCalibrationOffset((offset) => {
+        this.#els.calibrationOffset.value = offset.toFixed(1);
+      }),
+
+      this.#repo.onControllerConfig(({ hysteresis, minToggleMs }) => {
+        this.#els.hysteresis.value = hysteresis.toFixed(1);
+        // Stored in milliseconds, edited in whole seconds.
+        this.#els.minToggleSec.value = Math.round(minToggleMs / 1000);
+      })
+    ];
   }
 
   #saveControllerConfig() {

@@ -14,26 +14,38 @@ export const firebaseConfig = {
   appId: "1:11363048858:web:9d42ac960e407f4fe2ae23"
 };
 
-// Every Realtime Database path the app touches. The device mirrors these in
-// firmware config — keep the two in sync.
-export const DB_PATHS = {
-  sensor:            'ac/sensor',
-  status:            'ac/status',
-  heartbeat:         'ac/heartbeat',
-  command:           'ac/command',
-  auto:              'ac/auto',
-  schedule:          'ac/schedule',
-  history:           'ac/history',
-  debug:             'ac/debug',
-  debugFirebase:     'ac/debug/firebase',
-  debugIrEmitter:    'ac/debug/irEmitter',
-  debugIrReceiver:   'ac/debug/irReceiver',
-  calibration:       'ac/calibration',
-  calibrationOffset: 'ac/calibration/offset',
-  config:            'ac/config',
-  configHysteresis:  'ac/config/hysteresis',
-  configMinToggleMs: 'ac/config/minToggleMs'
-};
+// Roots of the two top-level trees. Live state is bounded and per-device under
+// DEVICES_ROOT; the growing history is a separate tree so the device picker can
+// read every device's live state without dragging history over the wire.
+export const DEVICES_ROOT = 'devices';
+export const HISTORY_ROOT = 'history';
+
+// Build every Realtime Database path for one device. The firmware mirrors this
+// layout (see AcCloud) — keep the two in sync. A schema change touches only
+// this function and its AcCloud counterpart.
+export function devicePaths(id) {
+  const base = `${DEVICES_ROOT}/${id}`;
+  return {
+    meta:              `${base}/meta`,
+    metaName:          `${base}/meta/name`,
+    sensor:            `${base}/sensor`,
+    status:            `${base}/status`,
+    heartbeat:         `${base}/heartbeat`,
+    command:           `${base}/command`,
+    auto:              `${base}/auto`,
+    schedule:          `${base}/schedule`,
+    history:           `${HISTORY_ROOT}/${id}`,
+    debug:             `${base}/debug`,
+    debugFirebase:     `${base}/debug/firebase`,
+    debugIrEmitter:    `${base}/debug/irEmitter`,
+    debugIrReceiver:   `${base}/debug/irReceiver`,
+    calibration:       `${base}/calibration`,
+    calibrationOffset: `${base}/calibration/offset`,
+    config:            `${base}/config`,
+    configHysteresis:  `${base}/config/hysteresis`,
+    configMinToggleMs: `${base}/config/minToggleMs`
+  };
+}
 
 // A heartbeat older than this marks the device offline.
 export const HEARTBEAT_STALE_MS = 90 * 1000;

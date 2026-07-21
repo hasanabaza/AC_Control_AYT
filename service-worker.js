@@ -4,7 +4,7 @@
 // always needs a live connection.
 
 // Bump CACHE_NAME whenever SHELL_FILES changes so old caches are evicted.
-const CACHE_NAME = 'night-cool-shell-v3';
+const CACHE_NAME = 'night-cool-shell-v4';
 const SHELL_FILES = [
   './',
   './index.html',
@@ -22,6 +22,7 @@ const SHELL_FILES = [
   './js/state/AppState.js',
   './js/utils/time.js',
   './js/views/AuthView.js',
+  './js/views/DevicePickerView.js',
   './js/views/HeroView.js',
   './js/views/ConnectionView.js',
   './js/views/SafetyBannerView.js',

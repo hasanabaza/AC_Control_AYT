@@ -60,6 +60,7 @@
     <div class="status-pill offline" id="statusPill">
       <span class="status-dot"></span><span id="statusText" data-i18n="statusChecking">Checking…</span>
     </div>
+    <select id="deviceSelect" class="device-select" data-i18n-title="deviceSelectTitle" aria-label="Device"></select>
     <div class="appbar-actions">
       <button class="icon-btn" id="languageToggle" aria-label="Switch language">🇹🇷</button>
       <button class="icon-btn" id="settingsBtn" data-i18n-title="settingsButtonTitle" title="Settings">⚙</button>
@@ -167,6 +168,13 @@
         <button class="btn btn-save" id="closeSettingsBtn" data-i18n="backButton">Back</button>
       </div>
       <div class="settings-grid">
+        <div class="settings-group">
+          <label for="deviceNameInput" data-i18n="deviceNameLabel">Device name</label>
+          <div class="settings-control-row">
+            <input id="deviceNameInput" type="text" autocomplete="off" data-i18n-placeholder="deviceNamePlaceholder">
+            <button class="btn btn-save" id="saveDeviceNameBtn" data-i18n="saveDeviceNameButton">Save name</button>
+          </div>
+        </div>
         <div class="settings-row">
           <label><input type="checkbox" id="debugFirebase"><span data-i18n="debugFirebase">Enable Firebase debug (console)</span></label>
         </div>

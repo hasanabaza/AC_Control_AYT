@@ -10,6 +10,7 @@ import { AcRepository } from './data/AcRepository.js';
 import { AppState } from './state/AppState.js';
 
 import { AuthView } from './views/AuthView.js';
+import { DevicePickerView } from './views/DevicePickerView.js';
 import { HeroView } from './views/HeroView.js';
 import { ConnectionView } from './views/ConnectionView.js';
 import { SafetyBannerView } from './views/SafetyBannerView.js';
@@ -21,6 +22,9 @@ import { HistoryChartView } from './views/HistoryChartView.js';
 import { SettingsView } from './views/SettingsView.js';
 
 const logger = log.child('App');
+
+// Remembers the last device selected, so a returning visitor lands on it.
+const LAST_DEVICE_KEY = 'nightcool.device';
 
 /**
  * Composition root: builds every collaborator, wires the repository's database
@@ -34,6 +38,8 @@ class NightCoolApp {
   #auth;
   #views;
   #listenersStarted = false;
+  // Unsubscribe functions for the *active device*; replaced on every switch.
+  #deviceUnsubs = [];
 
   constructor() {
     const app = initializeApp(firebaseConfig);
@@ -41,6 +47,8 @@ class NightCoolApp {
     this.#repo = new AcRepository(getDatabase(app));
 
     this.#views = {
+      picker: new DevicePickerView(this.#state, this.#i18n,
+        { onSelect: (id) => this.#selectDevice(id) }),
       hero: new HeroView(this.#state, this.#i18n),
       connection: new ConnectionView(this.#state, this.#i18n),
       safety: new SafetyBannerView(this.#state, this.#i18n),
@@ -91,6 +99,7 @@ class NightCoolApp {
 
   /** Paint initial state before any database data has arrived. */
   #renderAll() {
+    this.#views.picker.render();
     this.#views.hero.render();
     this.#views.connection.render();
     this.#views.safety.render();
@@ -101,27 +110,73 @@ class NightCoolApp {
     this.#views.manual.render();
   }
 
-  /** Attach database subscriptions. Runs once, on first successful sign-in. */
+  /**
+   * Runs once, on first successful sign-in. Subscribes to the device registry
+   * and starts the self-ageing views; per-device subscriptions are attached
+   * separately whenever the active device changes.
+   */
   #startListeners() {
     if (this.#listenersStarted) return;
     this.#listenersStarted = true;
-    logger.info('attaching database listeners');
+    logger.info('attaching device registry listener');
 
-    const state = this.#state;
-    this.#repo.onSensor((sensor) => state.setSensor(sensor));
-    this.#repo.onStatus((status) => state.setStatus(status));
-    this.#repo.onHeartbeat((heartbeat) => state.setHeartbeat(heartbeat));
-    this.#repo.onAuto((enabled) => state.setAutoEnabled(enabled));
-    this.#repo.onSchedule((schedule) => state.setSchedule(schedule));
-    this.#repo.onCommand((command) => state.setCommand(command));
-    this.#repo.onHistory((points) => state.setHistory(points));
-
-    this.#views.settings.bind();
+    this.#repo.onDevices((devices) => {
+      this.#state.setDevices(devices);
+      this.#ensureActiveDevice(devices);
+    });
 
     // Views whose output ages on its own need their own timers.
     this.#views.connection.start();
     this.#views.safety.start();
     this.#views.arc.start();
+  }
+
+  /**
+   * Pick an active device when none is selected yet (first load), or recover
+   * if the current one disappeared from the registry.
+   */
+  #ensureActiveDevice(devices) {
+    const current = this.#state.activeDeviceId;
+    if (current && devices.some((d) => d.id === current)) return;
+
+    const remembered = localStorage.getItem(LAST_DEVICE_KEY);
+    const pick = devices.find((d) => d.id === remembered) || devices[0] || null;
+    this.#selectDevice(pick ? pick.id : null);
+  }
+
+  /** Switch the active device: detach the old subscriptions, attach the new. */
+  #selectDevice(id) {
+    if (!id || id === this.#state.activeDeviceId) return;
+    logger.info(`switching to device ${id}`);
+
+    this.#detachDevice();
+    this.#state.resetDeviceData();
+    this.#state.setActiveDevice(id);
+    this.#repo.useDevice(id);
+    try { localStorage.setItem(LAST_DEVICE_KEY, id); } catch { /* private mode */ }
+    this.#attachDevice();
+  }
+
+  #detachDevice() {
+    for (const unsub of this.#deviceUnsubs) {
+      try { unsub(); } catch (e) { logger.warn('unsubscribe failed', e); }
+    }
+    this.#deviceUnsubs = [];
+  }
+
+  #attachDevice() {
+    const state = this.#state;
+    const repo = this.#repo;
+    this.#deviceUnsubs = [
+      repo.onSensor((sensor) => state.setSensor(sensor)),
+      repo.onStatus((status) => state.setStatus(status)),
+      repo.onHeartbeat((heartbeat) => state.setHeartbeat(heartbeat)),
+      repo.onAuto((enabled) => state.setAutoEnabled(enabled)),
+      repo.onSchedule((schedule) => state.setSchedule(schedule)),
+      repo.onCommand((command) => state.setCommand(command)),
+      repo.onHistory((points) => state.setHistory(points)),
+      ...this.#views.settings.bind()
+    ];
   }
 }
 

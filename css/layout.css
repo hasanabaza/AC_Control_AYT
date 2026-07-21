@@ -42,6 +42,16 @@ header.appbar{
 }
 .appbar-actions{display:flex;gap:8px;align-items:center;}
 
+/* Device picker sits between the status pill and the action buttons. Flexes to
+   fill the middle but stays capped so long names don't crowd out the icons. */
+.device-select{
+  flex:1 1 auto;min-width:0;max-width:210px;margin:0 10px;
+  background:var(--surface-2);border:1px solid var(--border);color:var(--text);
+  border-radius:12px;padding:7px 10px;font-size:0.86rem;font-weight:600;
+  text-overflow:ellipsis;cursor:pointer;
+}
+.device-select:disabled{color:var(--text-muted);cursor:default;}
+
 /* ---------- Safety banner ---------- */
 #safetyBanner{
   display:none;

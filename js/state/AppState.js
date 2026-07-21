@@ -12,6 +12,8 @@ import {
  * redrew on every sensor tick.
  */
 export class AppState extends EventTarget {
+  devices = [];
+  activeDeviceId = null;
   sensor = null;
   status = null;
   heartbeat = 0;
@@ -24,6 +26,47 @@ export class AppState extends EventTarget {
 
   #emit(name) {
     this.dispatchEvent(new CustomEvent(name));
+  }
+
+  // ------------------------------------------------------------------
+  // Device registry
+  // ------------------------------------------------------------------
+
+  /** Replace the list of known devices (from the /devices registry). */
+  setDevices(devices) {
+    this.devices = Array.isArray(devices) ? devices : [];
+    this.#emit('devices');
+  }
+
+  setActiveDevice(id) {
+    this.activeDeviceId = id;
+    this.#emit('activeDevice');
+  }
+
+  /** The currently selected device's registry entry, or null. */
+  get activeDevice() {
+    return this.devices.find((d) => d.id === this.activeDeviceId) || null;
+  }
+
+  /**
+   * Clear all per-device slices back to defaults. Called when switching
+   * devices so the UI never shows one device's readings against another's
+   * name while the new subscriptions are still landing.
+   */
+  resetDeviceData() {
+    this.sensor = null;
+    this.status = null;
+    this.heartbeat = 0;
+    this.autoEnabled = true;
+    this.schedule = structuredClone(DEFAULT_SCHEDULE);
+    this.command = { ...DEFAULT_COMMAND };
+    this.history = [];
+    this.lastLiveUpdateAt = 0;
+    this.scheduleDirty = false;
+    for (const slice of ['sensor', 'status', 'heartbeat', 'auto', 'schedule',
+                         'command', 'history', 'scheduleDirty']) {
+      this.#emit(slice);
+    }
   }
 
   /** Note that fresh data arrived from the device, for the "live update" tag. */
