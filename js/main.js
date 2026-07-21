@@ -24,14 +24,14 @@ import { SettingsView } from './views/SettingsView.js';
 const logger = log.child('App');
 
 // Remembers the last device selected, so a returning visitor lands on it.
-const LAST_DEVICE_KEY = 'nightcool.device';
+const LAST_DEVICE_KEY = 'climate.device';
 
 /**
  * Composition root: builds every collaborator, wires the repository's database
  * callbacks into the state, and lets each view react to the slices it cares
  * about. Nothing else in the app reaches across these boundaries.
  */
-class NightCoolApp {
+class ClimateControlApp {
   #state = new AppState();
   #i18n = new I18n(translations);
   #repo;
@@ -213,7 +213,7 @@ class NightCoolApp {
   }
 }
 
-new NightCoolApp().start();
+new ClimateControlApp().start();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

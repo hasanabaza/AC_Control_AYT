@@ -1,10 +1,10 @@
-// Night Cool - minimal app-shell service worker.
+// Climate Control - minimal app-shell service worker.
 // Caches the static shell so the page still opens (showing cached UI) if the
 // phone briefly has no signal. It does NOT cache Firebase data - live control
 // always needs a live connection.
 
 // Bump CACHE_NAME whenever SHELL_FILES changes so old caches are evicted.
-const CACHE_NAME = 'night-cool-shell-v8';
+const CACHE_NAME = 'climate-shell-v1';
 const SHELL_FILES = [
   './',
   './index.html',

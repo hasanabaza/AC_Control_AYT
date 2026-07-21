@@ -25,10 +25,10 @@ export const log = new Logger('app', {
  * Devtools escape hatch. The deployed PWA can't be rebuilt to turn on verbose
  * logging, so expose a way to raise it live:
  *
- *   nightCool.setLogLevel('debug')
- *   nightCool.dumpLogs()
+ *   climate.setLogLevel('debug')
+ *   climate.dumpLogs()
  */
-globalThis.nightCool = {
+globalThis.climate = {
   setLogLevel(level) {
     const resolved = log.setLevel(level);
     try {

@@ -1,7 +1,7 @@
 {
-  "name": "Night Cool - AC Control",
-  "short_name": "Night Cool",
-  "description": "Remote control and night schedule for the bedroom AC unit",
+  "name": "Climate Control",
+  "short_name": "Climate",
+  "description": "Remote control and schedules for home AC and heater units",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
