@@ -4,7 +4,7 @@
 // always needs a live connection.
 
 // Bump CACHE_NAME whenever SHELL_FILES changes so old caches are evicted.
-const CACHE_NAME = 'climate-shell-v1';
+const CACHE_NAME = 'climate-shell-v2';
 const SHELL_FILES = [
   './',
   './index.html',
