@@ -186,8 +186,22 @@ class NightCoolApp {
   #attachDevice() {
     const state = this.#state;
     const repo = this.#repo;
+    const activeId = state.activeDeviceId;
+
+    // The displayed temperature follows the control source: this device's own
+    // sensor, or another device's when tempSource points elsewhere (e.g. a
+    // heater reading the room AC). Re-point it whenever tempSource changes.
+    let sensorUnsub = null;
+    const repointSensor = (source) => {
+      if (sensorUnsub) sensorUnsub();
+      const sourceId = !source || source === 'local' ? activeId : source;
+      sensorUnsub = repo.onSensorOf(sourceId, (sensor) => state.setSensor(sensor));
+    };
+    repointSensor('local');  // sensible default until tempSource lands
+
     this.#deviceUnsubs = [
-      repo.onSensor((sensor) => state.setSensor(sensor)),
+      () => { if (sensorUnsub) sensorUnsub(); },
+      repo.onTempSource((source) => repointSensor(source)),
       repo.onStatus((status) => state.setStatus(status)),
       repo.onHeartbeat((heartbeat) => state.setHeartbeat(heartbeat)),
       repo.onAuto((enabled) => state.setAutoEnabled(enabled)),

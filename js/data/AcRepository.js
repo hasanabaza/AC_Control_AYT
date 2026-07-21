@@ -107,6 +107,15 @@ export class AcRepository {
     return this.#watch('sensor', handler);
   }
 
+  /**
+   * Latest sensor sample of ANY device by id — used to show the temperature a
+   * device controls from when its tempSource points at another device.
+   */
+  onSensorOf(deviceId, handler) {
+    return onValue(ref(this.#db, `${DEVICES_ROOT}/${deviceId}/sensor`),
+                   (snapshot) => handler(snapshot.val()));
+  }
+
   /** Device-reported AC state: {power, temp, mode, fan}. */
   onStatus(handler) {
     return this.#watch('status', handler);
