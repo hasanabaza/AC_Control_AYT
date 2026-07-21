@@ -57,7 +57,7 @@ class NightCoolApp {
       schedule: new ScheduleView(this.#state, this.#repo, this.#i18n),
       manual: new ManualControlView(this.#state, this.#repo),
       history: new HistoryChartView(this.#state, this.#i18n),
-      settings: new SettingsView(this.#repo),
+      settings: new SettingsView(this.#repo, this.#i18n),
       auth: new AuthView(this.#auth, this.#i18n, { onSignedIn: () => this.#startListeners() })
     };
   }
@@ -139,9 +139,19 @@ class NightCoolApp {
     const current = this.#state.activeDeviceId;
     if (current && devices.some((d) => d.id === current)) return;
 
+    // No devices left (e.g. the last one was just deleted): detach and clear so
+    // the UI doesn't keep showing a device that no longer exists.
+    if (!devices.length) {
+      this.#detachDevice();
+      this.#state.resetDeviceData();
+      this.#state.setActiveDevice(null);
+      this.#repo.useDevice(null);
+      return;
+    }
+
     const remembered = localStorage.getItem(LAST_DEVICE_KEY);
-    const pick = devices.find((d) => d.id === remembered) || devices[0] || null;
-    this.#selectDevice(pick ? pick.id : null);
+    const pick = devices.find((d) => d.id === remembered) || devices[0];
+    this.#selectDevice(pick.id);
   }
 
   /** Switch the active device: detach the old subscriptions, attach the new. */

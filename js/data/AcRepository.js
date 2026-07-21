@@ -1,9 +1,10 @@
 import {
-  ref, onValue, set, query, limitToLast
+  ref, onValue, set, remove, query, limitToLast
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 import {
-  devicePaths, DEVICES_ROOT, HISTORY_LIMIT, HISTORY_WINDOW_MS, HEARTBEAT_STALE_MS
+  devicePaths, DEVICES_ROOT, HISTORY_ROOT, HISTORY_LIMIT, HISTORY_WINDOW_MS,
+  HEARTBEAT_STALE_MS
 } from '../config.js';
 
 /**
@@ -81,6 +82,20 @@ export class AcRepository {
   /** Rename the active device. Firmware only seeds a name when absent, so this sticks. */
   setDeviceName(name) {
     return set(ref(this.#db, this.#path('metaName')), String(name).trim());
+  }
+
+  /**
+   * Permanently remove a device and its history. A device that is still powered
+   * on re-registers on its next check-in, so this only sticks for an offline
+   * (decommissioned) device — the UI warns about that before calling here.
+   * Defaults to the active device.
+   */
+  deleteDevice(id = this.#deviceId) {
+    if (!id) return Promise.resolve();
+    return Promise.all([
+      remove(ref(this.#db, `${DEVICES_ROOT}/${id}`)),
+      remove(ref(this.#db, `${HISTORY_ROOT}/${id}`))
+    ]);
   }
 
   // ------------------------------------------------------------------

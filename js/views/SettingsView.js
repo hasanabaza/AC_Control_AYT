@@ -6,10 +6,12 @@
  */
 export class SettingsView {
   #repo;
+  #i18n;
   #els;
 
-  constructor(repo) {
+  constructor(repo, i18n) {
     this.#repo = repo;
+    this.#i18n = i18n;
     this.#els = {
       mainView: document.getElementById('mainView'),
       settingsView: document.getElementById('settingsView'),
@@ -17,6 +19,7 @@ export class SettingsView {
       closeBtn: document.getElementById('closeSettingsBtn'),
       deviceName: document.getElementById('deviceNameInput'),
       saveDeviceNameBtn: document.getElementById('saveDeviceNameBtn'),
+      deleteDeviceBtn: document.getElementById('deleteDeviceBtn'),
       debugFirebase: document.getElementById('debugFirebase'),
       debugEmitter: document.getElementById('debugEmitter'),
       debugReceiver: document.getElementById('debugReceiver'),
@@ -34,6 +37,8 @@ export class SettingsView {
       const name = this.#els.deviceName.value.trim();
       if (name) this.#repo.setDeviceName(name);
     });
+
+    this.#els.deleteDeviceBtn.addEventListener('click', () => this.#deleteDevice());
 
     this.#els.debugFirebase.addEventListener('change', (e) =>
       this.#repo.setDebugFlag('firebase', e.target.checked));
@@ -88,6 +93,18 @@ export class SettingsView {
         this.#els.minToggleSec.value = Math.round(minToggleMs / 1000);
       })
     ];
+  }
+
+  /*
+   * Delete the active device (and its history). A powered-on device re-registers
+   * on its next check-in, so the confirmation says to unplug it first. After the
+   * delete, main.js's registry listener switches the picker to another device.
+   */
+  #deleteDevice() {
+    const name = this.#els.deviceName.value.trim() || this.#repo.deviceId || '';
+    if (!window.confirm(this.#i18n.t('deleteDeviceConfirm', { name }))) return;
+    this.#repo.deleteDevice();
+    this.close();
   }
 
   #saveControllerConfig() {
