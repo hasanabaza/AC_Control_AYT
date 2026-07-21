@@ -7,11 +7,14 @@
 export class SettingsView {
   #repo;
   #i18n;
+  #state;
   #els;
+  #tempSource = 'local';
 
-  constructor(repo, i18n) {
+  constructor(repo, i18n, state) {
     this.#repo = repo;
     this.#i18n = i18n;
+    this.#state = state;
     this.#els = {
       mainView: document.getElementById('mainView'),
       settingsView: document.getElementById('settingsView'),
@@ -20,6 +23,9 @@ export class SettingsView {
       deviceName: document.getElementById('deviceNameInput'),
       saveDeviceNameBtn: document.getElementById('saveDeviceNameBtn'),
       deleteDeviceBtn: document.getElementById('deleteDeviceBtn'),
+      tempSource: document.getElementById('tempSourceSelect'),
+      relayPin: document.getElementById('relayPinInput'),
+      saveRelayPinBtn: document.getElementById('saveRelayPinBtn'),
       debugFirebase: document.getElementById('debugFirebase'),
       debugEmitter: document.getElementById('debugEmitter'),
       debugReceiver: document.getElementById('debugReceiver'),
@@ -39,6 +45,19 @@ export class SettingsView {
     });
 
     this.#els.deleteDeviceBtn.addEventListener('click', () => this.#deleteDevice());
+
+    this.#els.tempSource.addEventListener('change', () =>
+      this.#repo.setTempSource(this.#els.tempSource.value));
+
+    this.#els.saveRelayPinBtn.addEventListener('click', () =>
+      this.#repo.setRelayPin(this.#els.relayPin.value));
+
+    // The temperature-source options are the other devices, so rebuild them
+    // whenever the device list, the active device, or the language changes.
+    this.#state.addEventListener('devices', () => this.#renderTempSourceOptions());
+    this.#state.addEventListener('activeDevice', () => this.#renderTempSourceOptions());
+    this.#i18n.onChange(() => this.#renderTempSourceOptions());
+    this.#renderTempSourceOptions();
 
     this.#els.debugFirebase.addEventListener('change', (e) =>
       this.#repo.setDebugFlag('firebase', e.target.checked));
@@ -63,6 +82,30 @@ export class SettingsView {
     this.#els.settingsView.style.display = 'none';
   }
 
+  /** Rebuild the temperature-source dropdown: "this device" plus every other device. */
+  #renderTempSourceOptions() {
+    const select = this.#els.tempSource;
+    const activeId = this.#state.activeDeviceId;
+    select.replaceChildren();
+
+    const local = document.createElement('option');
+    local.value = 'local';
+    local.textContent = this.#i18n.t('tempSourceLocal');
+    select.appendChild(local);
+
+    for (const device of this.#state.devices) {
+      if (device.id === activeId) continue;  // its own sensor is "local"
+      const opt = document.createElement('option');
+      opt.value = device.id;
+      opt.textContent = device.name;
+      select.appendChild(opt);
+    }
+
+    // Restore the stored selection; fall back to local if that source is gone.
+    select.value = this.#tempSource;
+    if (select.selectedIndex < 0) select.value = 'local';
+  }
+
   /**
    * Subscribe to the active device's settings paths. Returns the list of
    * unsubscribe functions so the composition root can detach them when the
@@ -70,6 +113,17 @@ export class SettingsView {
    */
   bind() {
     return [
+      this.#repo.onTempSource((source) => {
+        this.#tempSource = source;
+        this.#renderTempSourceOptions();
+      }),
+
+      this.#repo.onRelayPin((pin) => {
+        if (document.activeElement !== this.#els.relayPin) {
+          this.#els.relayPin.value = pin == null ? '' : String(pin);
+        }
+      }),
+
       this.#repo.onDeviceName((name) => {
         // Don't clobber a name the user is mid-edit; only sync when unfocused.
         if (document.activeElement !== this.#els.deviceName) {

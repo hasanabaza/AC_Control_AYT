@@ -187,6 +187,21 @@ export class AcRepository {
     });
   }
 
+  /** Which sensor drives control: 'local' or another device's id. Defaults to 'local'. */
+  onTempSource(handler) {
+    return this.#watch('tempSource', (value) => {
+      handler(typeof value === 'string' && value ? value : 'local');
+    });
+  }
+
+  /** Relay GPIO override for a heater; null when unset (firmware uses its default). */
+  onRelayPin(handler) {
+    return this.#watch('relayPin', (value) => {
+      const pin = Number(value);
+      handler(Number.isInteger(pin) && pin > 0 ? pin : null);
+    });
+  }
+
   /** Controller tuning: {hysteresis °C, minToggleMs}. */
   onControllerConfig(handler) {
     return this.#watch('config', (value) => {
@@ -229,6 +244,19 @@ export class AcRepository {
 
   setCalibrationOffset(offsetC) {
     return set(ref(this.#db, this.#path('calibrationOffset')), Number(offsetC) || 0);
+  }
+
+  /** Set the control temperature source: 'local' or another device's id. */
+  setTempSource(source) {
+    return set(ref(this.#db, this.#path('tempSource')), String(source || 'local'));
+  }
+
+  /** Set (or clear, when falsy/invalid) the heater relay GPIO override. */
+  setRelayPin(pin) {
+    const value = Number(pin);
+    const path = this.#path('relayPin');
+    if (Number.isInteger(value) && value > 0) return set(ref(this.#db, path), value);
+    return remove(ref(this.#db, path));
   }
 
   saveControllerConfig({ hysteresis, minToggleMs }) {

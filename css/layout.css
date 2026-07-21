@@ -164,6 +164,14 @@ canvas#historyChart{max-height:220px;touch-action:manipulation;}
    never sits flush against ordinary controls. */
 .danger-zone{border-top:1px solid var(--border);padding-top:16px;margin-top:4px;}
 .danger-note{font-size:0.72rem;color:var(--text-muted);margin:8px 0 0;line-height:1.5;}
+.settings-hint{font-size:0.72rem;color:var(--text-muted);margin:6px 0 0;line-height:1.5;}
+
+/* Type-aware controls. The active device's type is stamped on <body>; heater-
+   only controls (relay pin) are hidden until then, and AC-only controls (IR
+   debug, mode/fan) drop out for a heater. */
+.heater-only{display:none;}
+body[data-device-type="heater"] .heater-only{display:block;}
+body[data-device-type="heater"] .ac-only{display:none;}
 
 /* ---------- Footer ---------- */
 .footer-note{

@@ -128,7 +128,7 @@
             <button id="tempUp" aria-label="Increase temperature">+</button>
           </div>
         </div>
-        <div>
+        <div class="ac-only">
           <div class="ctrl-label" data-i18n="modeLabel">Mode</div>
           <select class="pill-select" id="modeSelect" aria-label="Mode">
             <option value="cool" data-i18n="modeCool">Cool</option>
@@ -137,7 +137,7 @@
             <option value="auto" data-i18n="modeAuto">Auto</option>
           </select>
         </div>
-        <div>
+        <div class="ac-only">
           <div class="ctrl-label" data-i18n="fanSpeedLabel">Fan speed</div>
           <select class="pill-select" id="fanSelect" aria-label="Fan speed">
             <option value="auto" data-i18n="fanAuto">Auto</option>
@@ -175,13 +175,26 @@
             <button class="btn btn-save" id="saveDeviceNameBtn" data-i18n="saveDeviceNameButton">Save name</button>
           </div>
         </div>
+        <div class="settings-group">
+          <label for="tempSourceSelect" data-i18n="tempSourceLabel">Temperature source</label>
+          <select id="tempSourceSelect" class="pill-select" aria-label="Temperature source"></select>
+          <p class="settings-hint" data-i18n="tempSourceNote">Which sensor this device controls from — its own, or another device's (e.g. the room AC).</p>
+        </div>
+        <div class="settings-group heater-only">
+          <label for="relayPinInput" data-i18n="relayPinLabel">Relay GPIO</label>
+          <div class="settings-control-row">
+            <input id="relayPinInput" type="number" min="0" step="1" inputmode="numeric" data-i18n-placeholder="relayPinPlaceholder">
+            <button class="btn btn-save" id="saveRelayPinBtn" data-i18n="saveRelayPinButton">Save pin</button>
+          </div>
+          <p class="settings-hint" data-i18n="relayPinNote">Must match how the relay is wired. Leave blank to use the firmware default.</p>
+        </div>
         <div class="settings-row">
           <label><input type="checkbox" id="debugFirebase"><span data-i18n="debugFirebase">Enable Firebase debug (console)</span></label>
         </div>
-        <div class="settings-row">
+        <div class="settings-row ac-only">
           <label><input type="checkbox" id="debugEmitter"><span data-i18n="debugEmitter">Enable IR emitter debug</span></label>
         </div>
-        <div class="settings-row">
+        <div class="settings-row ac-only">
           <label><input type="checkbox" id="debugReceiver"><span data-i18n="debugReceiver">Enable IR receiver debug</span></label>
         </div>
         <div class="settings-group">

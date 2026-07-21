@@ -57,7 +57,7 @@ class NightCoolApp {
       schedule: new ScheduleView(this.#state, this.#repo, this.#i18n),
       manual: new ManualControlView(this.#state, this.#repo),
       history: new HistoryChartView(this.#state, this.#i18n),
-      settings: new SettingsView(this.#repo, this.#i18n),
+      settings: new SettingsView(this.#repo, this.#i18n, this.#state),
       auth: new AuthView(this.#auth, this.#i18n, { onSignedIn: () => this.#startListeners() })
     };
   }
@@ -124,6 +124,15 @@ class NightCoolApp {
       this.#state.setDevices(devices);
       this.#ensureActiveDevice(devices);
     });
+
+    // Stamp the active device's type on <body> so type-aware CSS can hide the
+    // controls that don't apply (IR debug/mode/fan for a heater; relay pin for
+    // an AC).
+    const stampType = () => {
+      document.body.dataset.deviceType = this.#state.activeDevice?.type || '';
+    };
+    this.#state.addEventListener('activeDevice', stampType);
+    this.#state.addEventListener('devices', stampType);
 
     // Views whose output ages on its own need their own timers.
     this.#views.connection.start();
