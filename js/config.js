@@ -43,7 +43,9 @@ export function devicePaths(id) {
     calibrationOffset: `${base}/calibration/offset`,
     config:            `${base}/config`,
     configHysteresis:  `${base}/config/hysteresis`,
-    configMinToggleMs: `${base}/config/minToggleMs`
+    configMinToggleMs: `${base}/config/minToggleMs`,
+    tempSource:        `${base}/tempSource`,
+    relayPin:          `${base}/relayPin`
   };
 }
 
